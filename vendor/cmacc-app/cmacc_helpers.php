@@ -28,7 +28,7 @@ if (isset($_REQUEST[FILENAME])) {
         $lib_path = LIB_PATH;
         $viewName = $_REQUEST[VIEW] ;
         $keyName = $_REQUEST[KEYNAME] ;
-        $openForm = $_REQUEST['open'] ;
+        $openForm = $_REQUEST['open'] ?? '' ;
 //Make key default of "Model.Root"
         
 
@@ -155,4 +155,3 @@ switch ($_REQUEST[VIEW]) {
        include('./vendor/cmacc-app/view/source.php');
         break;
 }
-
