@@ -41,7 +41,7 @@ class Renderer:
         self.store, self.root, self.mode = store, root, mode
         self.remote, self.timeout = remote, timeout
         self.files, self.missing, self.visits, self.active = {}, [], [], set()
-        self.steps = self.cut = 0
+        self.steps = self.cut = self.max_depth = 0
 
     # - parsed object by store path or URL, read once per render
     # - None (and recorded as missing) when unavailable
@@ -120,7 +120,9 @@ class Renderer:
 
     # - how a resolved value appears: the marks.html macro named after the mode
     # - plain mode: the value as is
+    # - also records the deepest level reached (the Document view builds its depth buttons from it)
     def mark(self, key, value, depth):
+        self.max_depth = max(self.max_depth, depth)
         # marks.html: doc / trace / xray span macros
         macro = getattr(marks, self.mode, None) if self.mode != "plain" else None
         return str(macro(key, Markup(value), depth)) if macro else value

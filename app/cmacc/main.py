@@ -123,6 +123,7 @@ def document_view(req):
         css=css or f"Doc/G/Z/CSS/{default_css}",
         tabs=tabs,
         depth=depth,
+        max_depth=renderer.max_depth,
         body=Markup(text) if len(text.strip()) > 1 else None,
         missing=renderer.missing,
     )

@@ -75,3 +75,11 @@ def test_save(app, tmp_path):
     ).encode()
     status, _, _ = call(app, method="POST", body=form)
     assert status == 200 and (tmp_path / "G" / "doc.md").read_text() == "r00t=Saved"
+
+
+# - depth control: one radio button per nesting level plus All, and a CSS fold rule per level
+def test_depth_control(app, tmp_path):
+    (tmp_path / "G" / "deep.md").write_text("r00t={A}\nA=a {B}\nB=b {C}\nC=c\n")
+    _, _, body = call(app, query={"v": "d", "f": "G/deep.md"})
+    assert body.count('name="cmacc-depth"') == 4
+    assert 'body:has(#cmacc-depth-2:checked) .cmacc-span[data-depth="3"]' in body
