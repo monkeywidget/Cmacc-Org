@@ -118,11 +118,16 @@ tasks:
       - CMACC_SERVICE=cmacc-app CMACC_PORT=8081 infra/scripts/port-forward.sh start
       - CMACC_PORT=8081 infra/scripts/pulse.sh
 
-  app:lint:
-    desc: Ruff style checks on the Python app (complexity, long functions, line length, simplifications) + format check
+  ruff:
+    desc: "Ruff on the Python app, config from app/pyproject.toml (args: check | check --fix | format [--check]; default check)"
     cmds:
-      - infra/scripts/app-image.sh test
-      - docker --context ${CMACC_CONTEXT:-orbstack} run --rm --pull=never --network none -e HOME=/tmp cmacc-app:test sh -c 'ruff check --no-cache --output-format concise cmacc tests; c=$?; ruff format --no-cache --diff cmacc tests >/dev/null 2>/tmp/f; f=$?; tail -n 1 /tmp/f; exit $(( c | f ))'
+      - infra/scripts/ruff.sh {{.CLI_ARGS}}
+
+  app:lint:
+    desc: Style gate for the Python app - ruff check + format check (no changes)
+    cmds:
+      - infra/scripts/ruff.sh check --output-format concise
+      - infra/scripts/ruff.sh format --check
 
   app:sweep:
     silent: true

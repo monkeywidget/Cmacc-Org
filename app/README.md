@@ -55,7 +55,8 @@ flowchart LR
 ```bash
 task app:test     # unit tests (engine rules, loops, bytes, views, save)
 task app:sweep    # every template, engine only; fails on any error or timeout
-task app:lint     # Ruff: complexity, long functions, line length, simplifications, formatting
+task ruff         # Ruff check (config: pyproject.toml); `task ruff -- check --fix`, `task ruff -- format`
+task app:lint     # style gate: ruff check + format check, no changes
 task app:dev      # build app + templates images, deploy together, forward 8081, pulse
 CMACC_PORT=8081 task probe -- '/i.php?v=d&f=G/…&k=r00t' 'pattern'
 ```
