@@ -6,5 +6,5 @@
 
 # Mount as /G/ABA-HR-Business-MCC/
 
-# Demo at http://www.commonaccord.org/i.php?v=s&f=G/ABA-HR-Business-MCC/ClauseLibrary01.md
+# Demo at <a href="i.php?v=s&f=G/ABA-HR-Business-MCC/ClauseLibrary01.md">i.php?v=s&f=G/ABA-HR-Business-MCC/ClauseLibrary01.md</a>
 

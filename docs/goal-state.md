@@ -461,7 +461,7 @@ sequenceDiagram
 | M2 Compatibility suite | Black-box tests outside the app; any renderer vs any renderer | Prototype: one case, tool + unit tests; public baseline blocked by site outage |
 | M3 Deployment portability | Same image runs locally and on managed Kubernetes | Partial: probes, security context, limits, digest pinning; draft managed-cluster notes |
 | M4 Template storage abstraction | Filesystem (compatibility) and object storage backends | Not started |
-| M5 Python implementation | Python renderer at parity with Perl/PHP; Perl stays in the legacy image | Not started |
+| M5 Python implementation | Python renderer; every template renders without error (parity not required); Perl stays in the legacy image | Design done |
 | M6 Managed Kubernetes + identity | Managed cluster via infrastructure as code; human sign-in; per-workload managed identities | Not started |
 | M7 Templates cloud-only | Corpus in object storage with versions and roles; out of images and repo | Not started; needs explicit approval |
 | M8 Workflow engines | Human edit workflow; agent ingestion in Temporal; in-cluster agents | Not started |

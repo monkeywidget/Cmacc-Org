@@ -19,7 +19,7 @@ Licenses
 Consents
 Contribution Agreements
 
-E.g.=[http://www.commonaccord.org/i.php?v=l&f=S/Index/DataSharing/]
+E.g.=[S/Index/DataSharing/]
 
 
 2.2. Format for relevant projects:

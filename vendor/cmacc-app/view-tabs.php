@@ -15,10 +15,6 @@ echo " on ";
 
 echo "<a href=" . URLFORDOCSINREPO . substr($dir, URLFORDOCSINREPOOFFSET) . ">GitHub</a> ";
 
-# Open in VSCode
-
-echo  "<a href='vscode://file//Users/jgh/Documents/GitHub/CommonAccord-Org/Doc/$dir'>(VSCode)</a> ";
-
 # echo "<a href=" . URLFORREPO . "/search?utf8=✓&q=" . $dir . ">~PageRank </a>  &emsp; ";
 
 echo " &emsp; Doc views: ";

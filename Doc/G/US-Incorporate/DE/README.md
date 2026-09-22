@@ -4,7 +4,7 @@ Currently, we have only examples for the Certificate of Incorporation.
 
 The repository for this is at github.com/CommonAccord/US-Incorp.
 
-It can be viewed at www.CommonAccord.Org/i.php?v=l&f=G/US-Incorporate/DE/ 
+It can be viewed at <a href="i.php?v=l&f=G/US-Incorporate/DE/">i.php?v=l&f=G/US-Incorporate/DE/</a> 
 
 
 Delaware Incorporation Resources

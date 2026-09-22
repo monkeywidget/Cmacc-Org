@@ -3,4 +3,4 @@ from https://community.cloc.org/communitieshl/community-home/librarydocuments?Li
 
 Repo available at https://github.com/CommonAccord/CLOC-RequestForProposal
 
-Demo available at http://commonaccord.org/i.php?v=l&f=G/CLOC-RequestForProposal/Matter-Project/Long-Form/Nov2019/
+Demo available at <a href="i.php?v=l&f=G/CLOC-RequestForProposal/Matter-Project/Long-Form/Nov2019/">i.php?v=l&f=G/CLOC-RequestForProposal/Matter-Project/Long-Form/Nov2019/</a>

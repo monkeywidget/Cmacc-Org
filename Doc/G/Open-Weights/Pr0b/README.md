@@ -8,9 +8,9 @@ For the License.md, the changes were minor and discrete.  I just pasted the coup
 
 A couple of examples:
 
-Definition.md with only mandatory elements: <a href="http://www.commonaccord.org/i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=Mandatory.Sec">http://www.commonaccord.org/i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=Mandatory.Sec</a>
+Definition.md with only mandatory elements: <a href="i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=Mandatory.Sec">i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=Mandatory.Sec</a>
 
-With All elements: <a href="http://www.commonaccord.org/i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=All.Sec">http://www.commonaccord.org/i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=All.Sec</a>
+With All elements: <a href="i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=All.Sec">i.php?v=d&f=G/Open-Weights/Pr0b/Definition.md&k=All.Sec</a>
 
 
 
@@ -20,5 +20,5 @@ This demos the ProseObject format for the Definition and the License.  A few not
 
 The license is renamed "License.md", dropping the "Open Weights" part as redundant, removing spaces as inconvenient, and making the .MD lowercase for consistency.
 
-To see these ProseObject versions rendered, go to http://www.commonaccord.org/i.php?v=l&f=G/Open-Weights/Pr0b/.
+To see these ProseObject versions rendered, go to <a href="i.php?v=l&f=G/Open-Weights/Pr0b/">i.php?v=l&f=G/Open-Weights/Pr0b/</a>.
 

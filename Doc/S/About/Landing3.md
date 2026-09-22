@@ -63,7 +63,7 @@ MITConference.sec=<a href="i.php?v=d&f=S/About/Conference/Flyer/0.md">Conference
 
 CDL.Link=Call for <a href="https://docs.google.com/document/d/1X8NEAGpXAFf72rZxL8EKAAE5Idz_qVLbkcbIqfEW12c">Global Codification of Legal Documents</a>
 
-Bqc.Link=<a href="http://www.commonaccord.org/i.php?v=l&f=/bqc/fr/bnpp/a5we/">Universal bank account</a>
+Bqc.Link=<a href="i.php?v=l&f=/bqc/fr/bnpp/a5we/">Universal bank account</a>
 
 DemoDocName=Dx/Acme_UK/01-EU-US-DataTransfer/Doc_v0.md
 

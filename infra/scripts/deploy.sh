@@ -17,13 +17,14 @@ if ! docker --context "$CONTEXT" image inspect "$IMAGE" >/dev/null 2>&1; then
   echo "Image $IMAGE is not in the $CONTEXT image store. Run 'task build' first." >&2
   exit 1
 fi
-DIGEST=$(docker --context "$CONTEXT" image inspect "$IMAGE" --format '{{index .RepoDigests 0}}')
-DIGEST=${DIGEST#*@}
+REF=$(docker --context "$CONTEXT" image inspect "$IMAGE" --format '{{index .RepoDigests 0}}')
+DIGEST=${REF#*@}
 
 kubectl --context "$CONTEXT" apply -f "$MANIFEST"
 # apply alone does not undo an earlier override, so always set the image.
-[ "$IMAGE" = "$PINNED" ] || echo "Overriding pinned image with $IMAGE (not recorded in $MANIFEST)"
-kubectl --context "$CONTEXT" -n "$NS" set image deployment/cmacc-legacy web="$IMAGE"
+# Deploy by digest: a rebuilt tag would otherwise leave the old Pod running.
+[ "$IMAGE" = "$PINNED" ] || echo "Overriding pinned image with $IMAGE → $REF (not recorded in $MANIFEST)"
+kubectl --context "$CONTEXT" -n "$NS" set image deployment/cmacc-legacy web="$REF"
 kubectl --context "$CONTEXT" -n "$NS" rollout status deployment/cmacc-legacy --timeout=120s
 
 running=$(kubectl --context "$CONTEXT" -n "$NS" get pods -l app=cmacc-legacy \

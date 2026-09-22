@@ -3,7 +3,9 @@
 - Legacy PHP/Perl app + document corpus + static assets in one image
 - Nothing cloned or downloaded at startup
 - PHP and Perl only inside containers; never on macOS
-- Legacy application, templates, and deploy workflows unchanged
+- Legacy application and deploy workflows unchanged, except approved fixes:
+  - corpus links made relative (no hardcoded public host)
+  - developer-specific editor link removed from the tab bar
 
 ## Local development environment
 
@@ -127,6 +129,7 @@ flowchart LR
 
 ```bash
 task doctor              # host tools; prints install/fix commands
+task lint-links          # fail on hardcoded legacy-host URLs in deployed content
 task build               # pinned build, config test, checksums, digest vs lock
 task deploy              # apply manifest, wait for rollout
 task port-forward        # background forward to 127.0.0.1:8080
@@ -135,6 +138,7 @@ task port-forward:stop   # stop the forward
 task up                  # build, deploy, port-forward, pulse
 ```
 
+- **lint-links**: deployed content must use relative links, never the legacy public host; runs before every build
 - **build**: tags `cmacc-legacy:dev-<short-rev>`; reports digest match with the lock
 - **deploy**:
   - refuses an image missing from the local store

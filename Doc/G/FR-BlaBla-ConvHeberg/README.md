@@ -44,7 +44,7 @@ Le moteur Cmacc résout les variables en remontant la chaîne d'héritage : Inst
 
 1. Copier `Demo/Instance.md` en `Demo/Benef-NOM-PRENOM-AAAA-MM-JJ.md`.
 2. Renseigner toutes les valeurs `Benef.*` et `Sejour.*`.
-3. Rendre la convention via le moteur Cmacc (ex. : `https://commonaccord.org/i.php?v=doc&f=…`).
+3. Rendre la convention via le moteur Cmacc (ex. : `<a href="i.php?v=doc&f=…`">i.php?v=doc&f=…`</a>).
 
 ### Pour modifier le texte type
 

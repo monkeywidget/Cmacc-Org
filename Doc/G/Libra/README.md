@@ -5,7 +5,7 @@ Libra.Org is a new initiative to create a global system of payments. It will hav
 
 The repo is at github.com/CommonAccord/Libra.
 
-It can be seen at http://www.commonaccord.org/i.php?v=l&f=G/Libra/
+It can be seen at <a href="i.php?v=l&f=G/Libra/">i.php?v=l&f=G/Libra/</a>
 
 This repo is intended to be mounted as /G/Libra  - it depends on /Z/
 

@@ -14,8 +14,15 @@ tasks:
       - infra/scripts/doctor.sh
     silent: true
 
+  lint-links:
+    desc: Fail if deployed content hardcodes the legacy public host instead of relative links
+    cmds:
+      - infra/scripts/lint-links.sh
+    silent: true
+
   build:
     desc: Build the pinned legacy image on OrbStack and verify it (CMACC_IMAGE_TAG to override the tag)
+    deps: [lint-links]
     cmds:
       - infra/scripts/build.sh
     silent: true

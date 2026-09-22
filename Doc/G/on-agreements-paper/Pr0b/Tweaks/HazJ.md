@@ -4,11 +4,11 @@
 
 3.4.5.3.sec=And that all three can be interpreted coherently by the institutions we rely on to effectuate agreements and resolve disagreements.
 
-7.1.1.0.sec=Perhaps the most recognizable example is the <b>SAFE (Simple Agreement for Future Equity)</b>, introduced by Y Combinator. (See the <a href="http://www.commonaccord.org/i.php?v=l&f=G/YCombinator-SAFE-2020/Demo/">CommonAccord SAFE implementation.</a>The SAFE isn’t open source in the strict software sense, but it embodies many of the same principles:
+7.1.1.0.sec=Perhaps the most recognizable example is the <b>SAFE (Simple Agreement for Future Equity)</b>, introduced by Y Combinator. (See the <a href="i.php?v=l&f=G/YCombinator-SAFE-2020/Demo/">CommonAccord SAFE implementation.</a>The SAFE isn’t open source in the strict software sense, but it embodies many of the same principles:
 
 Common Accord=CommonAccord
 
-=[G/On-Agreements-Paper/Pr0b/README-PO.md]
+=[G/on-agreements-paper/Pr0b/README-PO.md]
 
-See at=<a href='www.commonaccord.org/i.php?v=s&f=G/On-Agreements-Paper/Pr0b/Tweaks/HazJ.md">www.commonaccord.org/i.php?v=s&f=G/On-Agreements-Paper/Pr0b/Tweaks/HazJ.md</a>
+See at=<a href="i.php?v=s&f=G/on-agreements-paper/Pr0b/Tweaks/HazJ.md">i.php?v=s&f=G/on-agreements-paper/Pr0b/Tweaks/HazJ.md</a>
 

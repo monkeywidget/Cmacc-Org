@@ -3,7 +3,7 @@ Lykke minimalist Consulting agreement!
 
 Repo at <a href="http://www.github.com/commonaccord/Lykke-QuickSwissConsultAgt-CmA">Github.com/commonaccord/Lykke-QuickSwissConsultAgt-CmA</a>
 
-Demo at <a href="http://www.commonaccord.org/i.php?v=l&f=G/Lykke-QuickSwissConsultAgt/">CommonAccord: G/Lykke-QuickSwissConsultAgt-CmA</a>
+Demo at <a href="i.php?v=l&f=G/Lykke-QuickSwissConsultAgt/">CommonAccord: G/Lykke-QuickSwissConsultAgt-CmA</a>
 
 Notes:
 
