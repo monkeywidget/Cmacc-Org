@@ -31,7 +31,9 @@ class Store:
     # - folder entries as (name, is_dir), sorted like a directory listing
     def listdir(self, rel):
         entries = self.fs.ls(self.path(rel), detail=True)
-        return sorted((posixpath.basename(e["name"].rstrip("/")), e["type"] == "directory") for e in entries)
+        return sorted(
+            (posixpath.basename(e["name"].rstrip("/")), e["type"] == "directory") for e in entries
+        )
 
     def isdir(self, rel):
         return self.fs.isdir(self.path(rel))

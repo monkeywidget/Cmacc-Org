@@ -14,7 +14,8 @@ MAX_STEPS = 1_000_000
 MAX_CHARS = 5_000_000
 
 
-# - legacy truth rule: "" and "0" count as not found, so the search continues and the placeholder stays
+# - legacy truth rule: "" and "0" count as not found
+# - so the search continues and the placeholder stays
 def found(value):
     return value is not None and value not in ("", "0")
 
@@ -42,11 +43,14 @@ class Renderer:
         self.files, self.missing, self.visits, self.active = {}, [], [], set()
         self.steps = self.cut = 0
 
-    # - parsed object by store path or URL, read once per render; None (and recorded) when unavailable
+    # - parsed object by store path or URL, read once per render
+    # - None (and recorded as missing) when unavailable
     def record(self, target):
         if target not in self.files:
             try:
-                self.files[target] = Record(self.fetch(target) if target.startswith("http") else self.store.read(target))
+                self.files[target] = Record(
+                    self.fetch(target) if target.startswith("http") else self.store.read(target)
+                )
             except (OSError, ValueError, HTTPException):
                 self.files[target] = None
                 self.missing.append(target)
@@ -62,7 +66,8 @@ class Renderer:
     # - expanded value of key in target, or None
     # - re-entering the same (file, key, prefix) means a loop: treated as unresolved
     # - budgets stop runaway templates (loops that grow the prefix, exponential fan-out):
-    # - nesting depth and total lookups per render; anything past a budget stays unresolved and is counted
+    # - budgets: nesting depth and total lookups per render
+    # - anything past a budget stays unresolved and is counted
     def resolve(self, target, key, prefix="", depth=0):
         record = self.record(target)
         token = (target, key, prefix)
@@ -87,14 +92,15 @@ class Renderer:
         for part, target in record.includes:
             if not key.startswith(part):
                 continue
-            rest = key[len(part):] if part and len(key) > len(part) else key
+            rest = key[len(part) :] if part and len(key) > len(part) else key
             value = self.resolve(target, rest, prefix + part, depth)
             self.visits.append((prefix + part, key, target, value))
             if found(value):
                 return value
         return None
 
-    # - each {name} resolves from the root document as prefix + name; unresolved names stay as written
+    # - each {name} resolves from the root document as prefix + name
+    # - unresolved names stay as written
     def expand(self, content, prefix, depth):
         for name in dict.fromkeys(PLACEHOLDER.findall(content)):
             key = prefix + name
@@ -112,9 +118,11 @@ class Renderer:
             content = content.replace("{" + name + "}", value)  # value is already wrapped by mark()
         return content
 
-    # - how a resolved value appears in the output: the macro named after the mode (marks.html); plain = as is
+    # - how a resolved value appears: the marks.html macro named after the mode
+    # - plain mode: the value as is
     def mark(self, key, value, depth):
-        macro = getattr(marks, self.mode, None) if self.mode != "plain" else None  # marks.html: doc / trace / xray span macros
+        # marks.html: doc / trace / xray span macros
+        macro = getattr(marks, self.mode, None) if self.mode != "plain" else None
         return str(macro(key, Markup(value), depth)) if macro else value
 
 

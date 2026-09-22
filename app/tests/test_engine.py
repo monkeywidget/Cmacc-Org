@@ -1,6 +1,7 @@
 import sys
 
-from hypothesis import given, settings, strategies as st
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 from cmacc.engine import Renderer, unresolved
 from cmacc.pages import marks
@@ -25,10 +26,22 @@ def render(tmp_path, files, key="r00t", root="doc.md", mode="plain"):
 
 # - the specification's worked example: instance values win, form placeholders resolve from the host
 def test_worked_example(tmp_path):
-    text, _ = render(tmp_path, {
-        "doc.md": "Company.Name=Acme, Inc.\nInvestor.Name=Andrea Ang\nAmount.$=$65,000\n=[Form/safe.md]\nr00t={Ti} {Body}\n",
-        "Form/safe.md": "Ti=SAFE between {Company.Name} and {Investor.Name}\nBody=Pays {Amount.$}. {MissingClause}\n",
-    })
+    text, _ = render(
+        tmp_path,
+        {
+            "doc.md": (
+                "Company.Name=Acme, Inc.\n"
+                "Investor.Name=Andrea Ang\n"
+                "Amount.$=$65,000\n"
+                "=[Form/safe.md]\n"
+                "r00t={Ti} {Body}\n"
+            ),
+            "Form/safe.md": (
+                "Ti=SAFE between {Company.Name} and {Investor.Name}\n"
+                "Body=Pays {Amount.$}. {MissingClause}\n"
+            ),
+        },
+    )
     assert text == "SAFE between Acme, Inc. and Andrea Ang Pays $65,000. {MissingClause}"
 
 
@@ -40,10 +53,13 @@ def test_first_writer_wins(tmp_path):
 
 # - prefixed include: key prefix stripped going in, placeholders resolve under the prefix
 def test_prefixed_include(tmp_path):
-    text, _ = render(tmp_path, {
-        "doc.md": "r00t={Buyer.Sig}\nBuyer.=[Who/acme.md]\nBuyer.Name=Acme Override\n",
-        "Who/acme.md": "Sig=Signed: {Name}\nName=Acme\n",
-    })
+    text, _ = render(
+        tmp_path,
+        {
+            "doc.md": "r00t={Buyer.Sig}\nBuyer.=[Who/acme.md]\nBuyer.Name=Acme Override\n",
+            "Who/acme.md": "Sig=Signed: {Name}\nName=Acme\n",
+        },
+    )
     assert text == "Signed: Acme Override"
 
 
@@ -62,7 +78,9 @@ def test_missing_include_reported_not_fatal(tmp_path):
 
 # - loops in includes and placeholders terminate with the placeholder unresolved
 def test_loops_terminate(tmp_path):
-    text, _ = render(tmp_path, {"doc.md": "=[b.md]\nr00t={A}\nA={A} and {B}\n", "b.md": "=[doc.md]\nB=ok\n"})
+    text, _ = render(
+        tmp_path, {"doc.md": "=[b.md]\nr00t={A}\nA={A} and {B}\n", "b.md": "=[doc.md]\nB=ok\n"}
+    )
     assert text == "{A} and ok"
 
 
@@ -86,8 +104,19 @@ def test_unresolved_and_suggestions():
 
 # - any include graph and placeholder pattern terminates (no infinite recursion)
 @settings(max_examples=150, deadline=None, database=None)
-@given(st.lists(st.tuples(st.integers(0, 4), st.integers(0, 4), st.sampled_from(["", "P."])), max_size=12),
-       st.lists(st.tuples(st.integers(0, 4), st.sampled_from(["A", "B", "P.A"]), st.sampled_from(["A", "B", "P.A", "x"])), max_size=12))
+@given(
+    st.lists(
+        st.tuples(st.integers(0, 4), st.integers(0, 4), st.sampled_from(["", "P."])), max_size=12
+    ),
+    st.lists(
+        st.tuples(
+            st.integers(0, 4),
+            st.sampled_from(["A", "B", "P.A"]),
+            st.sampled_from(["A", "B", "P.A", "x"]),
+        ),
+        max_size=12,
+    ),
+)
 def test_any_graph_terminates(tmp_path_factory, includes, values):
     files = {f"f{i}.md": "" for i in range(5)}
     for src, dst, prefix in includes:

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Run Ruff on the Python app with the project's config (app/pyproject.toml).
-# app/ is mounted read-write as your user, so `check --fix` and `format` edit files in place.
+# app/ is streamed into the container and only files Ruff changed are streamed back,
+# so results never depend on bind-mount caching (which served stale files right after edits).
 # Usage: ruff.sh [ruff args...]   default: check
 #   ruff.sh check              # findings
 #   ruff.sh check --fix        # apply safe fixes
@@ -11,7 +12,24 @@ cd "$(dirname "$0")/../.."
 CONTEXT=${CMACC_CONTEXT:-orbstack}
 docker --context "$CONTEXT" image inspect cmacc-app:test >/dev/null 2>&1 || infra/scripts/app-image.sh test
 
-docker --context "$CONTEXT" run --rm --pull=never --network none \
-  --user "$(id -u):$(id -g)" --env HOME=/tmp --env RUFF_NO_CACHE=true \
-  --mount "type=bind,src=$PWD/app,dst=/work" --workdir /work \
-  cmacc-app:test ruff "${@:-check}"
+# In the container: unpack a copy, keep a pristine copy, run Ruff (output to stderr),
+# then write a tar of only the changed files to stdout for the host to unpack.
+CHANGED='
+import filecmp, os, sys, tarfile
+out = tarfile.open(fileobj=sys.stdout.buffer, mode="w|")
+for root, _, files in os.walk("."):
+    for name in files:
+        path = os.path.join(root, name)
+        before = os.path.join("/tmp/before", path)
+        if not os.path.exists(before) or not filecmp.cmp(path, before, shallow=False):
+            out.add(path)
+out.close()
+'
+COPYFILE_DISABLE=1 tar -C app --exclude __pycache__ -cf - . |
+  docker --context "$CONTEXT" run -i --rm --pull=never --network none \
+    --env HOME=/tmp --env RUFF_NO_CACHE=true --env CHANGED="$CHANGED" cmacc-app:test sh -c '
+      mkdir -p /tmp/work /tmp/before && cd /tmp/work && tar -xf - && cp -a . /tmp/before
+      ruff "$@" >&2; status=$?
+      python -c "$CHANGED"
+      exit $status' _ "${@:-check}" |
+  tar -C app -xf -

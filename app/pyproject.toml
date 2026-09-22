@@ -21,7 +21,9 @@ test = [
 # Style checks (task app:lint). Limits target long, branchy, verbose functions.
 [tool.ruff]
 line-length = 100
-target-version = "py314"
+# Runtime is 3.14; formatting targets 3.13 so 3.14-only syntax (e.g. unparenthesized
+# multi-exception `except`) is not introduced. Readability over newest syntax.
+target-version = "py313"
 
 [tool.ruff.lint]
 select = [

@@ -2,7 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 # - everything deployment-specific, from CMACC_* environment variables
-# - store: template store as a local path or fsspec URL; files/static: supporting materials and images
+# - store: template store as a local path or fsspec URL
+# - files / static: supporting materials and images
 # - repo_url empty = GitHub and Compare links hidden
 # - remote includes: fetched in memory with a timeout, or disabled
 class Settings(BaseSettings):
