@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cmacc-local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cmacc-legacy
+  namespace: cmacc-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cmacc-legacy
+  template:
+    metadata:
+      labels:
+        app: cmacc-legacy
+    spec:
+      nodeSelector:
+        kubernetes.io/arch: arm64
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 33
+        runAsGroup: 33
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: web
+          # Built locally in OrbStack; update this digest after a deliberate rebuild.
+          image: cmacc-legacy@sha256:8239f4056724561d76ec9b5580bac5c750933f25ec1339939b165570ed1510cf
+          imagePullPolicy: Never
+          ports:
+            - name: http
+              containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          startupProbe:
+            httpGet:
+              path: /i.php?v=l&f=G/
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /i.php?v=l&f=G/
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cmacc-legacy
+  namespace: cmacc-local
+spec:
+  type: ClusterIP
+  selector:
+    app: cmacc-legacy
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

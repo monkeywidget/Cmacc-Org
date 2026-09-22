@@ -1,7 +1,6 @@
 P
 D
 .DS_Store
-.gitignore
 .gitattributes
 
 *.docx
@@ -36,3 +35,11 @@ Doc/G/a16z-contracts/licenses/*
 
 
 Doc/G/NVCA/2020/SPA/Form/Was*
+
+# Local agent guidance, tooling state, and persisted work documents.
+/AGENTS.md
+/.agent-work/
+/.agents/
+/.codex/
+/.claude/
+/CLAUDE.md
