@@ -22,6 +22,7 @@ FROM app AS test
 USER root
 COPY app/requirements-test.txt ./
 RUN pip install --no-cache-dir --require-hashes --no-deps -r requirements-test.txt
+COPY app/pyproject.toml ./
 COPY app/tests ./tests
 USER 65532:65532
 CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", "tests"]

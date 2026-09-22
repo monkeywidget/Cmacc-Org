@@ -2,6 +2,7 @@
 **
 !app/requirements.txt
 !app/requirements-test.txt
+!app/pyproject.toml
 !app/cmacc/
 !app/cmacc/**
 !app/tests/

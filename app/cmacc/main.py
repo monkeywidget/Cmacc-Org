@@ -4,16 +4,15 @@ import posixpath
 import re
 import sys
 from functools import lru_cache
-from pathlib import Path
 from urllib.parse import parse_qs
 
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
-from jinja2 import Environment, FileSystemLoader
 from markupsafe import Markup
 
-from .engine import Renderer, suggestions, unresolved
+from .engine import PLACEHOLDER, Renderer, unresolved
+from .pages import marks, pages
 from .settings import Settings
 from .store import Store
 
@@ -29,7 +28,7 @@ DOC_VIEWS = {
 sys.setrecursionlimit(20000)
 settings = Settings()
 store = Store(settings.store)
-pages = Environment(loader=FileSystemLoader(Path(__file__).parent / "templates"), autoescape=True)
+BRACE_OPEN, BRACE_CLOSE = str(marks.brace_open()), str(marks.brace_close())  # marks.html: <span class="missing">{ … }</span>
 app = FastAPI(title="CommonAccord", docs_url=None, redoc_url=None)
 for route, folder in [("/File", settings.files), ("/png", f"{settings.static}/png"),
                       ("/image", f"{settings.static}/image"), ("/vendor/png", f"{settings.static}/vendor/png")]:
@@ -64,79 +63,69 @@ def document_view(view, path, key, context):
     mode, default_css, tabs, depth = DOC_VIEWS[view]
     key = key if len(key) >= 2 else "r00t"
     text, renderer, css = render(path, key, mode)
-    if view == "missing":
-        text = "".join(f"{name}=<br><br>\n" for name in unresolved(text))
-    elif view == "openedit":
-        return html(pages.get_template("openedit.html").render(
-            context, suggestions=suggestions(unresolved(text)), existing=store.read(path),
+    if view == "openedit":
+        return html(pages.get_template("openedit.html").render(  # suggestion lines via marks.suggest
+            context, names=unresolved(text), existing=store.read(path),
             stamp=datetime.date.today().strftime("%Y/%m/%d")), renderer.missing)
+    if view == "missing":
+        text = pages.get_template("missing.html").render(names=unresolved(text))  # "name=<br><br>" per unresolved field
     elif view == "trace":
-        rows = "".join(f"<tr><td align='left' valign='top'>{p}</td><td valign='top' align='left'>{k} <br>[{t}]</td>"
-                       f"<td>{v or ''}</td></tr>" for p, k, t, v in reversed(renderer.visits))
-        text = ("<table style='width:100%'><tr><th align='left' style='width:10%'>Prefix</th><th align='left' "
-                f"style='width:10%'>Key -- File</th><th align='left' style='width:80%'>Output</th></tr>{rows}</table>")
+        text = pages.get_template("trace.html").render(visits=reversed(renderer.visits))  # <table> of includes visited
     text = text.replace("{Render.Metadata}", f"({path}#{key} on {datetime.date.today():%Y-%m-%d})")
     if view == "print":
         text = text.replace("(Curly-)", "{").replace("(-Curly)", "}")
     else:
-        text = text.replace("{", "<span class='missing'>{").replace("}", "}</span>")
-    page = pages.get_template("document.html").render(
+        text = text.replace("{", BRACE_OPEN).replace("}", BRACE_CLOSE)  # highlight every unresolved {field}
+    page = pages.get_template("document.html").render(  # <head> stylesheet, tab bar, depth control, body
         context, css=css or f"Doc/G/Z/CSS/{default_css}", tabs=tabs, depth=depth,
         body=Markup(text) if len(text.strip()) > 1 else None, missing=renderer.missing)
     return html(page, renderer.missing)
 
 
-# - source key/value table: links for includes, folders, and each placeholder; key links render that key
-def source_rows(path, text):
+# - source lines as data for source.html: what kind of key and value each line has
+# - value kinds: remote / folder / include links, or text whose {placeholders} become links
+# - parts alternate text and placeholder names (re.split with a capture group)
+def source_rows(text):
     rows = []
     for line in text.split("\n"):
         key, _, rest = line.partition("=")
         value, _, comment = rest.partition("///")
         if not (key or value):
             continue
-        if m := re.search(r"\[http(.+?)\]", value):
-            vlink = f"<a href=http{m[1]}>{value}</a>"
-        elif m := re.search(r"\[(.+?)/\]", value):
-            vlink = f"<a href=?v=list&f={m[1]}/>{value}</a>"
-        elif m := re.match(r"\[(.+?)\]", value):
-            vlink = f"<a href=?v=s&f={m[1]}>{value}</a>"
-        else:
-            vlink = re.sub(r"\{([^}]+)\}", lambda p: f"{{<a href=?v=d&f={path}&k={p[1]} class=variable >{p[1]}</a>}}", value)
-        if re.search(r"\s", key) or key.endswith(":"):
-            klink = key
-        elif key.endswith("."):
-            klink = f"<a class='expand' href=?v=d&f={path}&k={key}r00t >{key}</a>"
-        else:
-            klink = f"<a href=?v=d&f={path}&k={key} class='definedterm'>{key}</a>"
-        rows.append((Markup(klink), Markup(f"{vlink} {comment}")))
+        link = (re.search(r"\[(http.+?)\]", value) and "remote") or (re.search(r"\[(.+?)/\]", value) and "folder") \
+            or (re.match(r"\[(.+?)\]", value) and "include") or "text"
+        target = re.search(r"\[(.+?)/?\]", value)[1] if link != "text" else None
+        key_kind = "plain" if re.search(r"\s", key) or key.endswith(":") else "expand" if key.endswith(".") else "term"
+        # source.html: key_kind picks the key cell's <a>; link picks the value cell's <a>; parts become placeholder links
+        rows.append({"key": key, "key_kind": key_kind, "value": Markup(value), "link": link, "target": target,
+                     "parts": PLACEHOLDER.split(value), "comment": Markup(comment)})
     return rows
 
 
-# - JSON-ish view: include edges, then plain key/values with placeholders in bold
+# - JSON-ish view as data: include edges, then key/values split into text and placeholder names
 def json_parts(text):
     edges, data = [], []
     for line in text.split("\n"):
         key, eq, value = line.partition("=")
         if m := re.search(r"\[(.+?)\]", value):
-            edges.append((key, m[1]))
+            edges.append((key, m[1]))  # json.html: "edges" list, target linked
         elif eq:
-            data.append((key, Markup(re.sub(r"\{([^}]+)\}", r'", "<b>\1</b>", "', str(Markup.escape(value))))))
+            data.append((key, PLACEHOLDER.split(value)))  # json.html: "data" list, names in <b>
     return edges, data
 
 
-# - folder listing: intro page, subfolders, files, README; repo link when configured
+# - folder listing: intro page, subfolders, files, README paragraphs; repo link when configured
 def list_view(folder, context):
     folder = folder if folder.endswith("/") or not folder else folder + "/"
     intro = next((store.read(folder + n) for n in ("listintro.html", "list.html") if store.isfile(folder + n)), None)
     entries = [(n, d) for n, d in store.listdir(folder)
                if not (n.startswith(".") or (not d and n in ("list.html", "listintro.html")))]
-    readme = store.read(folder + "README.md") if store.isfile(folder + "README.md") else None
-    for blank in ("\n\r\n\r", "\n\n", "\r\r"):
-        readme = readme.replace(blank, "<br>") if readme else readme
+    readme = store.read(folder + "README.md") if store.isfile(folder + "README.md") else ""
+    paragraphs = [Markup(p) for p in re.split(r"\n\r\n\r|\n\n|\r\r", readme)] if readme else []  # list.html joins with <br>
     parent = posixpath.dirname(folder.rstrip("/"))
-    return html(pages.get_template("list.html").render(
+    return html(pages.get_template("list.html").render(  # breadcrumb, intro, entry links, README
         context, folder=folder, parent=parent, name=posixpath.basename(folder.rstrip("/")),
-        intro=Markup(intro) if intro else None, entries=entries, readme=Markup(readme) if readme else None))
+        intro=Markup(intro) if intro else None, entries=entries, readme=paragraphs))
 
 
 # - legacy save: overwrite an existing object with normalized line endings, trimmed
@@ -172,13 +161,13 @@ async def dispatch(request: Request):
         return list_view(path, context)
     error = save(path, params.get("newcontent", "")) if "submit" in params and view in ("source", "json") else None
     if not store.isfile(path):
-        return html(pages.get_template("message.html").render(context, message=f"No such document: {path}"))
+        return html(pages.get_template("message.html").render(context, message=f"No such document: {path}"))  # <h3> message
     text = store.read(path)
     if view == "json":
         edges, data = json_parts(text)
-        return html(pages.get_template("json.html").render(context, edges=edges, data=data, error=error))
+        return html(pages.get_template("json.html").render(context, edges=edges, data=data, error=error))  # edges + data lists
     notice = None if view == "source" else "That is not a valid 'view'. Try 'v=s' or 'v=l' etc."
-    return html(pages.get_template("source.html").render(context, rows=source_rows(path, text), error=error, notice=notice))
+    return html(pages.get_template("source.html").render(context, rows=source_rows(text), error=error, notice=notice))  # key = value table
 
 
 # - corpus files (stylesheets, images) by their Doc/ path, served from the template store

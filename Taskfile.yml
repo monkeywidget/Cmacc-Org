@@ -118,6 +118,12 @@ tasks:
       - CMACC_SERVICE=cmacc-app CMACC_PORT=8081 infra/scripts/port-forward.sh start
       - CMACC_PORT=8081 infra/scripts/pulse.sh
 
+  app:lint:
+    desc: Ruff style checks on the Python app (complexity, long functions, line length, simplifications) + format check
+    cmds:
+      - infra/scripts/app-image.sh test
+      - docker --context ${CMACC_CONTEXT:-orbstack} run --rm --pull=never --network none -e HOME=/tmp cmacc-app:test sh -c 'ruff check --no-cache --output-format concise cmacc tests; c=$?; ruff format --no-cache --diff cmacc tests >/dev/null 2>/tmp/f; f=$?; tail -n 1 /tmp/f; exit $(( c | f ))'
+
   app:sweep:
     silent: true
     desc: "Render every template with the Python engine; fails on any error or timeout (args: --mode plain|trace|xray, templates)"

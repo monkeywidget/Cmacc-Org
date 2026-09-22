@@ -1,0 +1,35 @@
+{#- Inline markup used by the engine and views. Keys are escaped; values are corpus HTML (Markup). -#}
+
+{#- Document view: nested, depth-tagged spans; the depth control collapses them by data-depth. -#}
+{%- macro doc(key, value, depth) -%}
+<span title="{{ key }}" id="{{ key }}" data-depth="{{ depth }}" data-cmacc-title="{{ key }}" class="cmacc-span"><span class="cmacc-content">{{ value }}</span></span>
+{%- endmacro -%}
+
+{#- Trace view: each resolved value titled with its key. -#}
+{%- macro trace(key, value, depth) -%}
+<span title="{{ key }}" id="{{ key }}">{{ value }}</span>
+{%- endmacro -%}
+
+{#- Xray view: key and value shown inline, one per line. -#}
+{%- macro xray(key, value, depth) -%}
+<span title="{{ key }}" id="{{ key }}">(<b>{{ key }}</b> = {{ value }})</span><br>
+{%- endmacro -%}
+
+{#- Unresolved placeholders: every brace highlighted, as in the legacy views. -#}
+{%- macro brace_open() -%}<span class="missing">{{ "{" }}{%- endmacro -%}
+{%- macro brace_close() -%}{{ "}" }}</span>{%- endmacro -%}
+
+{#- Open parameters: a suggested source line per unresolved name, by corpus naming convention. -#}
+{%- macro suggest(name) -%}
+{%- if name.startswith("DefT.") -%}{%- set term = name[5:] -%}
+{{ term }}=<a class='definedterm' href='{!!!}DefT.{{ term }}'>{{ term.replace("_", " ") }}</a>
+{%- elif name.startswith("_") -%}{%- set term = name[1:] -%}
+{{ term }}=<a class='definedterm' href='{!!!}DefT.{{ term }}'>{{ term.replace("_", " ") }}</a>
+{%- elif name.startswith("FtNt.") -%}
+{{ name }}=<sup><a class='xref' href='{!!!}{{ name[:-5] }}.sec'>{{ name[5:-5] }}</a></sup>
+{%- elif name.endswith(".Xnum") -%}
+{{ name }}=<a class='xref' href='{!!!}{{ name[:-5] }}.sec'>{{ name[:-5] }}</a>
+{%- else -%}
+{{ name }}=
+{%- endif -%}
+{%- endmacro -%}

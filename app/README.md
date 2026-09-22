@@ -26,6 +26,7 @@ flowchart LR
 - Added: missing include reported (response header, HTML comment), page still renders
 - Added: loop guard plus budgets (nesting, lookups, text size); cuts counted, placeholder left unresolved
 - One engine, output modes per view: document spans, plain, trace, xray
+- No HTML in Python: page markup in Jinja templates; inline markup (value spans, brace highlighting, parameter suggestions) as macros in one macros template; Python passes data
 
 ## Views
 
@@ -54,6 +55,7 @@ flowchart LR
 ```bash
 task app:test     # unit tests (engine rules, loops, bytes, views, save)
 task app:sweep    # every template, engine only; fails on any error or timeout
+task app:lint     # Ruff: complexity, long functions, line length, simplifications, formatting
 task app:dev      # build app + templates images, deploy together, forward 8081, pulse
 CMACC_PORT=8081 task probe -- '/i.php?v=d&f=G/…&k=r00t' 'pattern'
 ```

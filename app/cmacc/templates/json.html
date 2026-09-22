@@ -3,9 +3,11 @@
 {% include "tabs.html" %}
 {% if error %}<span style="color: red">{{ error }}</span>{% endif %}
 <h4>JSON source view:</h4>
+{# Edges: include lines (main.json_parts edges = key, target) #}
 {<ul type='none'><li>"edges" : [ <ul type='none'><li>
-{% for k, target in edges %}[ {% if k %}"{{ k }}" : {% else %}"" : {% endif %}"<a href=i.php?v=j&f={{ target }}>{{ target }}</a>" ] , {% endfor %}
+{% for k, target in edges %}[ "{{ k }}" : "<a href=i.php?v=j&f={{ target }}>{{ target }}</a>" ] , {% endfor %}
+{# Data: plain key/values (main.json_parts data = key, parts); placeholder names in bold #}
 <br>]</ul>"data" {<ul type='none'><li>
-{% for k, v in data %}"{{ k }}" : "{{ v }}" ,<br><br>
+{% for k, parts in data %}"{{ k }}" : "{% for part in parts %}{% if loop.index is even %}", "<b>{{ part }}</b>", "{% else %}{{ part }}{% endif %}{% endfor %}" ,<br><br>
 {% endfor %}<br>}</ul></ul>}
 </body>

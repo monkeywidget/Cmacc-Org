@@ -45,7 +45,7 @@ def test_views_render(app, view):
 # - Document view: resolved text, unresolved field highlighted, no repo link when unconfigured
 def test_document_view(app):
     _, _, body = call(app, query={"v": "d", "f": "G/doc.md"})
-    assert "World" in body and "<span class='missing'>{Gone}</span>" in body and "GitHub" not in body
+    assert "World" in body and '<span class="missing">{Gone}</span>' in body and "GitHub" not in body
 
 
 # - folder listing shows entries and the README

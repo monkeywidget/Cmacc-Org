@@ -2,7 +2,8 @@ import sys
 
 from hypothesis import given, settings, strategies as st
 
-from cmacc.engine import Renderer, suggestions, unresolved
+from cmacc.engine import Renderer, unresolved
+from cmacc.pages import marks
 from cmacc.store import Store
 
 sys.setrecursionlimit(20000)
@@ -74,13 +75,13 @@ def test_bytes_and_crlf(tmp_path):
 # - document mode marks each resolved value with its key and depth
 def test_doc_mode_spans(tmp_path):
     text, _ = render(tmp_path, {"doc.md": "r00t={A}\nA=v\n"}, mode="doc")
-    assert "data-depth='1'" in text and "title='A'" in text and ">v<" in text
+    assert 'data-depth="1"' in text and 'title="A"' in text and ">v<" in text
 
 
-# - analysis helpers used by the Missing and Open-parameters views
+# - helpers behind the Missing and Open-parameters views
 def test_unresolved_and_suggestions():
     assert unresolved("{a} {b} {a}") == ["a", "b"]
-    assert "My Term" in suggestions(["DefT.My_Term"]) and "x=" in suggestions(["x"])
+    assert "My Term" in marks.suggest("DefT.My_Term") and str(marks.suggest("x")) == "x="
 
 
 # - any include graph and placeholder pattern terminates (no infinite recursion)

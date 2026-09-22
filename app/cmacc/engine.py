@@ -1,7 +1,10 @@
 import re
-from html import escape
 from http.client import HTTPException
 from urllib.request import urlopen
+
+from markupsafe import Markup
+
+from .pages import marks
 
 PLACEHOLDER = re.compile(r"\{([^}]+)\}")
 INCLUDE = re.compile(r"^([^=]*)=\[(.+?)\]")
@@ -106,39 +109,15 @@ class Renderer:
             if len(content) + len(value) > MAX_CHARS:
                 self.cut += 1
                 continue
-            content = content.replace("{" + name + "}", value)
+            content = content.replace("{" + name + "}", value)  # value is already wrapped by mark()
         return content
 
-    # - how a resolved value appears in the output, per mode
+    # - how a resolved value appears in the output: the macro named after the mode (marks.html); plain = as is
     def mark(self, key, value, depth):
-        k = escape(key)
-        if self.mode == "doc":
-            return (f"<span title='{k}' id='{k}' data-depth='{depth}' data-cmacc-title='{k}' class='cmacc-span'>"
-                    f"<span class='cmacc-content'>{value}</span></span>")
-        if self.mode == "trace":
-            return f'<span title="{k}" id="{k}" >{value}</span>'
-        if self.mode == "xray":
-            return f'<span title="{k}" id="{k}" >(<b>{k}</b> = {value})</span><br>'
-        return value
+        macro = getattr(marks, self.mode, None) if self.mode != "plain" else None  # marks.html: doc / trace / xray span macros
+        return str(macro(key, Markup(value), depth)) if macro else value
 
 
 # - unresolved placeholders in output order, each once
 def unresolved(text):
     return list(dict.fromkeys(PLACEHOLDER.findall(text)))
-
-
-# - suggested parameters for the open-parameters view, using the corpus naming conventions
-def suggestions(names):
-    lines = []
-    for n in names:
-        if n.startswith("DefT."):
-            lines.append(f"{n[5:]}=<a class='definedterm' href='{{!!!}}DefT.{n[5:]}'>{n[5:].replace('_', ' ')}</a>")
-        elif n.startswith("_"):
-            lines.append(f"{n[1:]}=<a class='definedterm' href='{{!!!}}DefT.{n[1:]}'>{n[1:].replace('_', ' ')}</a>")
-        elif n.startswith("FtNt."):
-            lines.append(f"{n}=<sup><a class='xref' href='{{!!!}}{n[:-5]}.sec'>{n[5:-5]}</a></sup>")
-        elif n.endswith(".Xnum"):
-            lines.append(f"{n}=<a class='xref' href='{{!!!}}{n[:-5]}.sec'>{n[:-5]}</a>")
-        else:
-            lines.append(f"{n}=")
-    return "\n".join(lines) + ("\n" if lines else "")

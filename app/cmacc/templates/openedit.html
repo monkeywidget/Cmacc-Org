@@ -1,10 +1,13 @@
+{% import "marks.html" as marks %}
 <body style="margin:20;padding:0">
 {% include "header.html" %}
 {% include "tabs.html" %}
+{# Open parameters: suggestions for unresolved names (marks.suggest), then the file as it is; Save posts to the Source view (main.save) #}
 <form method='post' action='i.php'>
 <textarea id='textedit' cols=120 rows=30 name='newcontent' style='font-size: 16px; padding:10px;'>//=Open parameters as of {{ stamp }}:
 
-{{ suggestions }}//=Prior existing parameters:
+{% for name in names %}{{ marks.suggest(name) }}
+{% endfor %}//=Prior existing parameters:
 
 {{ existing }}</textarea><br>
 <input class="btn btn-info" type="submit" name="submit" value="Save">
