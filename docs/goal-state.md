@@ -1,7 +1,7 @@
 # Goal state
 
 - Where the CommonAccord modernization is heading
-- Azure used as the example cloud throughout; not a final provider decision
+- Cloud: Azure (first managed deploy to AKS, images in ACR); service choices shown are still examples
 - Diagrams show intent, not a finished design; open decisions listed at the end
 
 ## Goal state summary
@@ -453,25 +453,12 @@ sequenceDiagram
 
 ## Milestones
 
-- Labels only; order and dependencies not decided
-
-| Milestone | Outcome | Status |
-|---|---|---|
-| M1 Legacy on local Kubernetes | Pinned legacy image, corpus baked in, on local Kubernetes; developer and diagnostic tasks | Done |
-| M2 Compatibility suite | Gate = every template renders without error (render sweep over the whole corpus); public-parity comparison optional, not a gate | Sweep in place for the legacy renderer; Python sweep with M5 |
-| M3 Deployment portability | Same image runs locally and on managed Kubernetes; no hardcoded hosts, paths, or architecture; no new CDN-hosted assets (out of scope) | Mostly done: relative links, case-exact includes, repo links from config, any-architecture builds, pre-build guards. Remaining: registry publishing |
-| M4 Template storage abstraction | Templates shipped as their own image, deployed alongside the server; store location from config (object storage later by URL) | Done: templates image + init container into a Pod volume; fsspec store from settings |
-| M5 Python implementation | Python renderer; every template renders without error (parity not required); Perl stays in the legacy image | Done: all views ported; 5,236 templates render with 0 errors / 0 timeouts; deployed locally next to legacy |
-| M6 Managed Kubernetes + identity | Managed cluster via infrastructure as code; human sign-in; per-workload managed identities | Not started |
-| M7 Templates cloud-only | Corpus in object storage with versions and roles; out of images and repo | Not started; needs explicit approval |
-| M8 Workflow engines | Human edit workflow; agent ingestion in Temporal; in-cluster agents | Not started |
-| M9 Chatbot | Slack (example) → n8n → LangChain tool choice → tool flows | Not started |
-| M10 API layer + tool gateway | One app API; agent-safe MCP-like gateway with catalog, authorization, audit | Not started |
-| M11 Review tooling | Change proposals with source/rendered diffs, trace, provenance, decisions | Not started |
+- Status and notes: [milestones.md](milestones.md)
 
 ## Constraints
 
-- Legacy PHP/Perl app and corpus remain the reference until the suite shows parity
+- Legacy PHP/Perl app: left unchanged wherever possible
+  - exception: bug fixes found during the port that are worth backporting
 - Removing templates from the repo and images changes the project's current contract
   - needs explicit approval at that point
   - filesystem backend stays as the compatibility option until then
@@ -481,7 +468,7 @@ sequenceDiagram
 
 ## Open decisions
 
-- Cloud provider (Azure is the example)
+- CI platform (chosen with the first AKS deploy)
 - Workflow engine for human edit workflows: n8n or Temporal
 - Whether app state needs a database, and which state
 - Infrastructure-as-code tool; GitOps or pipeline-driven deploys

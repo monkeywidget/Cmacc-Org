@@ -2,7 +2,8 @@
 
 - Status: draft
 - Known facts only, from the local OrbStack deployment
-- Provider, registry, and network details not decided; left out on purpose
+- Decided: Azure AKS, images in Azure Container Registry (ACR); CI chosen with the first deploy
+- Network and ingress details not decided; left out on purpose
 
 ## Target shape
 
@@ -12,12 +13,12 @@
 ```mermaid
 flowchart LR
   build["Validated image<br/>by digest"]
-  reg[("Container registry<br/>not decided")]
+  reg[("Azure Container Registry")]
   users["Users"]
   entry["Ingress / DNS / TLS<br/>not decided"]
   remote[("Remote documents")]
 
-  subgraph cluster["Managed cluster (TBD)"]
+  subgraph cluster["AKS cluster"]
     svc["Service<br/>cluster-internal"]
     subgraph pod["Pod: 1 replica"]
       app["Apache + PHP + Perl, non-root<br/>baked corpus, writable, disposable"]
@@ -30,7 +31,7 @@ flowchart LR
   app -.->|"outbound HTTP(S)"| remote
 
   classDef open stroke-dasharray: 5 5
-  class reg,entry,cluster open
+  class entry open
 ```
 
 ## Carries over unchanged
@@ -50,7 +51,7 @@ flowchart LR
 ## Must change from local
 
 - **Image source**
-  - publish to an approved registry; reference as `<registry>/cmacc-legacy@sha256:<digest>`
+  - publish to ACR; reference as `<registry>.azurecr.io/<image>@sha256:<digest>`
   - drop the local-only "never pull" policy
 - **Architecture**
   - build for the node architecture (`CMACC_PLATFORM`), or multi-arch
@@ -97,8 +98,7 @@ flowchart LR
 
 ## Not yet decided
 
-- Cloud provider and cluster
-- Registry, and how CI pushes to it
+- CI platform, and how it pushes to ACR
 - Target node architecture
 - Ingress, DNS, TLS
 - Access control for save endpoints
