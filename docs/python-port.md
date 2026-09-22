@@ -158,7 +158,10 @@ flowchart TB
 - 3 files use CRLF line endings
 - Cyclic includes and self-referencing placeholders → guard, emit the placeholder unresolved
 - Store paths are case-sensitive on Linux and object storage
-  - at least one corpus reference differs only by case (works on macOS, fails on Linux)
+  - corpus references now match real paths exactly; a pre-build check keeps it that way
+- Missing include targets: 114 templates still reference content not in the store (older sibling repos, deleted example parties)
+  - report and keep rendering; these templates must still render
+- Include loops: at least one template loops forever in the legacy parser (misreported as a missing file); 15 templates hit a 20-second limit
 - Remote includes (18 objects use `http` targets) → fetched with a timeout; failure = missing include, page still renders
 - Keep the legacy semantics authors rely on: first matching line wins, prefixed inheritance, placeholders re-resolve from the root document with the accumulated prefix
 - Save endpoints kept: source and JSON views write through the store (line endings normalized, trimmed)
@@ -183,6 +186,42 @@ flowchart LR
 - Running server: existing pulse task pointed at the Python service
 - Legacy Perl image stays available for manual side-by-side checks; not a gate
 
+## Porting order
+
+```mermaid
+flowchart LR
+  s1["1. Engine +<br/>Document view<br/>(landing = Document<br/>of landing template)"] --> s2["2. Source + List<br/>browse, read, save"]
+  s2 --> s3["3. Print + Missing<br/>engine variants"]
+  s3 --> s4["4. Open parameters, Trace,<br/>Xray, Visual, JSON"]
+```
+
+- Each step ships when every template renders without error in that step's views
+- Step 1: the core
+  - resolution engine, depth-tagged spans, missing-field highlighting, render date
+  - landing page = Document view of the configured landing template; no separate code
+- Step 2: makes the site usable end to end
+  - List: folders, intro pages, README
+  - Source: key/value table with links; carries the save endpoint
+- Step 3: small variations on the engine (plain output; list of unresolved fields)
+- Step 4: analysis and alternate views, lowest use
+- Not ported: explore and graph pages (unreachable from the router)
+
+## Carry-overs from the hardcode audit
+
+- One settings object (environment, `CMACC_` prefix) for everything deployment-specific
+  - template store location (local path or object-storage URL); no working-directory assumption
+  - remote-include policy and timeout
+  - repo URL and branch for GitHub / Compare links, same names as the legacy app; links hidden when unset
+  - landing template
+- Remote includes fetched in memory; no temp files in the store, no shell commands
+- Loop guard on includes and placeholders; emit the placeholder unresolved
+- Missing include = reported, rest of the page renders (fixes the remaining 114 without corpus changes)
+- Case-sensitive store access; no case-folding fallbacks
+- Browser assets (CSS, scripts) served locally from pinned copies, not public CDNs
+- Relative links only in generated pages, so the app works under any host or subdirectory
+- Image builds for any architecture, reusing the platform-from-engine build behavior
+- Existing corpus checks (no legacy-host or root-relative links; exact include paths) keep running before every build, whichever renderer ships
+
 ## Size estimate
 
 - Custom Python: roughly 300–400 lines (engine, modes, routes) plus templates
@@ -200,5 +239,5 @@ flowchart LR
 
 ## Open decisions
 
-- Views to port first (Document, Source, List are the core; Trace, Xray, Open parameters later?)
-- Whether to fix known corpus defects (case mismatch, dead targets) as part of the port
+- Remaining missing include targets: recover content from older repos, or leave as reported gaps
+- Remote-include policy: open fetching vs an allow-list

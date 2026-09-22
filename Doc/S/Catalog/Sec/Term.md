@@ -22,7 +22,7 @@ Intra-Group-Data-Transfer.=[G/Intra-Group-Data-Transfer-Agt/Sec/Life/0.md]
 
 =From Investment / Notes
 
-Techstars-Bridge.=[G/Techstars-BridgeForms-ConvertibleNote/Sec/Maturity/0.md] /// Maturity and repayment — note equivalent of term
+Techstars-Bridge.=[G/TechStars-BridgeForms-ConvertibleNote/Sec/Maturity/0.md] /// Maturity and repayment — note equivalent of term
 
 =From NDA Sources
 

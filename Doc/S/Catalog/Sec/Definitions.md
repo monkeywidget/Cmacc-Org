@@ -34,4 +34,4 @@ CICMA.=[G/CICMA/Sec/Def/0.md]
 
 =Ontological Approach
 
-ANG-Ontology.=[G/ANG-Ontology/0.md] /// Definitions structured as an ontology
+ANG-Ontology.=[G/aNG-Ontology/0.md] /// Definitions structured as an ontology

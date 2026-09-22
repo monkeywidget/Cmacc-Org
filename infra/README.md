@@ -102,6 +102,7 @@ Tested host baseline:
 
 ## Runtime
 
+- Repo links (GitHub, Compare) from `CMACC_REPO_URL` / `CMACC_REPO_BRANCH`; hidden when unset
 - Non-root (UID/GID 33), port 8080
 - Apache front controller is the directory index
 - PHP diagnostics to stderr; short tags on
@@ -129,7 +130,8 @@ flowchart LR
 
 ```bash
 task doctor              # host tools; prints install/fix commands
-task lint-links          # fail on hardcoded legacy-host URLs in deployed content
+task lint-links          # fail on legacy-host or root-relative links in deployed content
+task lint-includes       # fail on include targets that only work on case-insensitive disks
 task build               # pinned build, config test, checksums, digest vs lock
 task deploy              # apply manifest, wait for rollout
 task port-forward        # background forward to 127.0.0.1:8080
@@ -138,12 +140,15 @@ task port-forward:stop   # stop the forward
 task up                  # build, deploy, port-forward, pulse
 ```
 
-- **lint-links**: deployed content must use relative links, never the legacy public host; runs before every build
-- **build**: tags `cmacc-legacy:dev-<short-rev>`; reports digest match with the lock
+- **lint-links**: deployed content must use relative links, never the legacy public host or `/i.php`; reviewed exceptions in an allow-list; runs before every build
+- **lint-includes**: include targets must match real paths exactly (Linux and object storage are case-sensitive); missing targets reported, not fatal; runs before every build
+- **build**: tags `cmacc-legacy:dev-<short-rev>`; platform = the engine's architecture unless `CMACC_PLATFORM` is set; reports digest match with the lock
 - **deploy**:
   - refuses an image missing from the local store
   - `CMACC_IMAGE=<tag or digest>`: try another local image without editing the manifest
   - plain deploy restores the pinned digest
+  - always deploys by digest, so a rebuilt tag rolls out
+  - refuses an image whose architecture matches no cluster node
   - renews a forward started by the task; manual forwards need a manual restart
 - **port-forward**: refuses a busy port; pid and log in `$TMPDIR`
 - **pulse**:
@@ -154,6 +159,7 @@ task up                  # build, deploy, port-forward, pulse
 |---|---|---|
 | `CMACC_CONTEXT` | `orbstack` | all |
 | `CMACC_IMAGE_TAG` | `cmacc-legacy:dev-<short-rev>` | build |
+| `CMACC_PLATFORM` | engine architecture | build |
 | `CMACC_IMAGE` | pinned digest | deploy |
 | `CMACC_PORT` | `8080` | port-forward, pulse |
 | `CMACC_BASE_URL` | `http://127.0.0.1:$CMACC_PORT` | pulse |
@@ -181,8 +187,9 @@ kubectl --context orbstack -n cmacc-local port-forward \
 
 - Open <http://127.0.0.1:8080/>; Ctrl-C stops access, not the deployment
 - Restart the forward after Pod replacement
-- Artifact is arm64; Deployment selects arm64 nodes
-  - amd64 base exists, but an amd64 app build needs its own validation and digest
+- Locked artifact is arm64; builds default to the engine's architecture
+  - the manifest pins no architecture; deploy checks image vs nodes
+  - amd64 builds work (emulated here) but need their own validation and digest before locking
 - Deployment shape:
   - one replica, no service-account token, no Linux capabilities
   - startup/readiness probes: PHP catalog page

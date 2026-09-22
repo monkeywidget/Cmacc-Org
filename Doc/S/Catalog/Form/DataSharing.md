@@ -52,4 +52,4 @@ TheFDP-DTUA.=[G/TheFDP/DTUA/Form/0.md] /// Data Transfer and Use Agreement. Mult
 
 WEF-DSA.=[G/WEF-DSA/ChathamHouseDemo/UsingStandardDisputeResolution/0.md] /// World Economic Forum Data Sharing Alliance. Multiple solutions.
 
-Access-Request-Template.=[G/Access-Request-Template/Cmacc/Demo/Ang-Acme-UK.md] /// Template for requesting data access
+Access-Request-Template.=[G/access-request-template/Cmacc/Demo/Ang-Acme-UK.md] /// Template for requesting data access

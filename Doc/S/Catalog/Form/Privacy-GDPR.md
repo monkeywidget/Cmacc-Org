@@ -24,7 +24,7 @@ FR-CNIL-Mandat.=[G/FR-CNIL-Mandat-Exercise-Droits-RGPD/FR/Form/0.md] /// Mandate
 
 =Responsible Data Use
 
-Responsible-Data-Use-Policy.=[G/Responsible-Data-Use-Policy/PrOb/RDSP/0.md]
+Responsible-Data-Use-Policy.=[G/responsible-data-use-policy/PrOb/RDSP/0.md]
 
 Gov-NIH-AllOfUs.=[G/Gov-NIH-AllOfUs/OperationalProtocol/Form/1.md] /// NIH All of Us research program protocol. Multiple solutions.
 

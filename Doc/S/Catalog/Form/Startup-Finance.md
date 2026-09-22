@@ -10,7 +10,7 @@ YCombinator-SAFE-2026.=[G/YCombinator-SAFE/2026/Demo/Acme-Ang-Cap-NoDiscount.md]
 
 Acme-Ang-YC-Note.=[G/Acme-Ang-YC-Note/Cap.md] /// YC convertible note example
 
-Techstars-Bridge-ConvertibleNote.=[G/Techstars-BridgeForms-ConvertibleNote/Form/0.md]
+Techstars-Bridge-ConvertibleNote.=[G/TechStars-BridgeForms-ConvertibleNote/Form/0.md]
 
 500Startups-KISS.=[G/500Startups-KISS/Form/0.md] /// Keep It Simple Security (500 Startups)
 

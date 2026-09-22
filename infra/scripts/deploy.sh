@@ -18,6 +18,13 @@ if ! docker --context "$CONTEXT" image inspect "$IMAGE" >/dev/null 2>&1; then
   exit 1
 fi
 REF=$(docker --context "$CONTEXT" image inspect "$IMAGE" --format '{{index .RepoDigests 0}}')
+# The image must match a node's architecture (the manifest does not pin one).
+IMAGE_ARCH=$(docker --context "$CONTEXT" image inspect "$IMAGE" --format '{{.Architecture}}')
+NODE_ARCHES=$(kubectl --context "$CONTEXT" get nodes -o jsonpath='{.items[*].status.nodeInfo.architecture}')
+if ! printf '%s\n' $NODE_ARCHES | grep -qx "$IMAGE_ARCH"; then
+  echo "Image is $IMAGE_ARCH but cluster nodes are: $NODE_ARCHES. Rebuild with CMACC_PLATFORM=linux/<arch>." >&2
+  exit 1
+fi
 DIGEST=${REF#*@}
 
 kubectl --context "$CONTEXT" apply -f "$MANIFEST"

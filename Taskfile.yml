@@ -20,9 +20,15 @@ tasks:
       - infra/scripts/lint-links.sh
     silent: true
 
+  lint-includes:
+    desc: Fail on include targets that only work on case-insensitive disks (missing targets reported)
+    cmds:
+      - infra/scripts/lint-includes.sh {{.CLI_ARGS}}
+    silent: true
+
   build:
     desc: Build the pinned legacy image on OrbStack and verify it (CMACC_IMAGE_TAG to override the tag)
-    deps: [lint-links]
+    deps: [lint-links, lint-includes]
     cmds:
       - infra/scripts/build.sh
     silent: true

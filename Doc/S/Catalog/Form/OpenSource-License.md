@@ -8,7 +8,7 @@ Polyform.=[G/Polyform-Licenses/Form/Noncommercial-1.0.0.md] /// Polyform license
 
 LexPredict.=[G/LexPredict-SoftwareLicense-110064/Form/0.md]
 
-A16Z-Contracts.=[G/A16Z-Contracts/licenses/pr0b/CBE-Commercial.md] /// a16z contract-based licensing templates. Multiple solutions.
+A16Z-Contracts.=[G/a16z-contracts/licenses/pr0b/CBE-Commercial.md] /// a16z contract-based licensing templates. Multiple solutions.
 
 ChooseALicense.=[G/ChooseALicense/License/MIT/Form/0.md] /// choosealicense.com license catalog. Multiple solutions.
 
@@ -28,7 +28,7 @@ CreativeCommons-4.0.=[G/CreativeCommons/4.0/BY.md] /// CC 4.0 license family. Mu
 
 CreativeCommons-PatentModel.=[G/CreativeCommons/Model_Patent_License/Form/0.md] /// CC model patent license
 
-NFT-License.=[G/NFT-License/PO/Non-Exclusive/Form/01.0.md] /// NFT license forms. Multiple solutions.
+NFT-License.=[G/nft-license/PO/Non-Exclusive/Form/01.0.md] /// NFT license forms. Multiple solutions.
 
 =Contributor Agreements
 

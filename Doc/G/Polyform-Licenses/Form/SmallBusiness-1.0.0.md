@@ -6,4 +6,4 @@ sec=<ol><li>{Accept.Sec}</li><li>{License.Copyright.LimitDistribute-LimitNewWork
 
 Def.sec={Def.Base.sec}
 
-=[G/PolyForm-Licenses/Sec/CommonLibrary.md]
+=[G/Polyform-Licenses/Sec/CommonLibrary.md]

@@ -6,7 +6,7 @@ Note=AI-related documents span regulatory law (EU AI Act, California SB 1047), d
 
 EU-AI-Act.=[G/EU/Artificial_Intelligence_Act/0.md] /// EU Artificial Intelligence Act — partially implemented
 
-A16Z-AI-for-Startups.=[G/A16Z-AI-for-Startups/0.md] /// a16z AI for Startups policy document
+A16Z-AI-for-Startups.=[G/a16z-ai-for-startups/0.md] /// a16z AI for Startups policy document
 
 OECD-AI-Principles.=[G/OECD/AI-Principles/Recommendations-of-Council-On-AI.md] /// OECD AI Principles (incompletely implemented as ProseObject)
 

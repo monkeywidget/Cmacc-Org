@@ -33,7 +33,7 @@ Startup Document sets:
 
 NVCA (only partially completed)
 
--=[G/NVCA-SPA-CmA/Sec/0.md]
+-=[G/NVCA/2017/SPA/Sec/0.md]
 
 TechStars:
 

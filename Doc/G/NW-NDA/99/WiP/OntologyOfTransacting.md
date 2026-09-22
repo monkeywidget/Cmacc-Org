@@ -36,11 +36,11 @@ CodersNote=Agreements involve a number of notions:
 Some Ontologies:
 
 Persons - Entities:
-ISO-LEI - i.php?v=l&f=OTF/ISO-ELF/Type/
+ISO-LEI - <a href="i.php?v=l&f=OTF/ISO-ELF/Type/">i.php?v=l&f=OTF/ISO-ELF/Type/</a>
 
 Financial Flows:
 
-ACTUS -  i.php?v=l&f=OTF/ACTUS/Taxonomy/
+ACTUS -  <a href="i.php?v=l&f=OTF/ACTUS/Taxonomy/">i.php?v=l&f=OTF/ACTUS/Taxonomy/</a>
 
 Private Information:
 

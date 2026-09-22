@@ -6,7 +6,15 @@ set -euo pipefail
 cd "$(dirname "$0")/../.."
 LOCK=infra/runtime-lock.json
 CONTEXT=${CMACC_CONTEXT:-orbstack}
-PLATFORM=${CMACC_PLATFORM:-linux/arm64}
+# Default: the engine's own architecture. CMACC_PLATFORM overrides, e.g.
+# linux/amd64 or linux/amd64,linux/arm64 (multi-arch needs emulation to verify).
+ENGINE_ARCH=$(docker --context "$CONTEXT" info --format '{{.Architecture}}')
+case $ENGINE_ARCH in
+  aarch64|arm64) DEFAULT_PLATFORM=linux/arm64 ;;
+  x86_64|amd64) DEFAULT_PLATFORM=linux/amd64 ;;
+  *) echo "Unsupported engine architecture: $ENGINE_ARCH (set CMACC_PLATFORM)" >&2; exit 1 ;;
+esac
+PLATFORM=${CMACC_PLATFORM:-$DEFAULT_PLATFORM}
 EPOCH=${SOURCE_DATE_EPOCH:-$(sed -n 's/.*"source_date_epoch": \([0-9]*\).*/\1/p' "$LOCK")}
 TAG=${CMACC_IMAGE_TAG:-cmacc-legacy:dev-$(git rev-parse --short HEAD)}
 LOCKED=$(sed -n '/"application_image"/,/}/s/.*"reference": "\([^"]*\)".*/\1/p' "$LOCK")

@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Fail if deployed content hardcodes the legacy public host. Rendered pages must
-# use relative links so they work wherever the app is deployed.
+# Fail if deployed content hardcodes the legacy public host or links to the site
+# root (/i.php). Rendered pages must use relative links so they work wherever the
+# app is deployed, including under a subdirectory.
 # Scans the same paths the image packages (see .dockerignore).
 set -u
 
 cd "$(dirname "$0")/../.."
 # Any subdomain, with a scheme, or scheme-less with a path (www.x.org/i.php).
-PATTERN='https?://([a-z0-9-]+\.)*commonaccord\.org|([a-z0-9-]+\.)*commonaccord\.org/'
+PATTERN='https?://([a-z0-9-]+\.)*commonaccord\.org|([a-z0-9-]+\.)*commonaccord\.org/|(href|src)=["'"'"']?/i\.php'
 PATHS=(Doc File image png vendor i.php index.php .htaccess)
 
 ALLOW=infra/lint-links.allow
@@ -16,11 +17,11 @@ if [ -n "$hits" ] && [ -f "$ALLOW" ]; then
   hits=$(printf '%s\n' "$hits" | grep -vF -f <(grep -v '^#' "$ALLOW" | grep -v '^$') || true)
 fi
 if [ -z "$hits" ]; then
-  echo "No hardcoded legacy-host URLs in deployed content."
+  echo "No legacy-host or root-relative links in deployed content."
   exit 0
 fi
 
 count=$(printf '%s\n' "$hits" | wc -l | tr -d ' ')
-echo "$count hardcoded legacy-host URL(s); use relative links (e.g. i.php?v=...) instead:"
+echo "$count non-portable link(s); use relative links (e.g. i.php?v=...) instead:"
 printf '%s\n' "$hits" | cut -c1-200 | sed 's/^/  /'
 exit 1

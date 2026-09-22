@@ -16,7 +16,7 @@ ChathamHouse.=[G/ChathamHouseOrg/DataSharing/Sec/Misc/Amend/0.md]
 
 TechContracts.=[G/TechContracts/Sections/Misc/Amend/1/0.md]
 
-Techstars-Bridge.=[G/Techstars-BridgeForms-ConvertibleNote/Sec/Amend/0.md]
+Techstars-Bridge.=[G/TechStars-BridgeForms-ConvertibleNote/Sec/Amend/0.md]
 
 ABA-MSPA.=[G/ABA-MSPA-SPA/Sec/Misc/Amend/0.md]
 

@@ -18,7 +18,7 @@ YCSafe2020.sec={YCSafe2020.Amend.How.sec}
 
 YCSafe2020.=[G/YCombinator-SAFE-2020/Sideletter/US/v1-0.md]
 
-TechStarsBridge.=[G/Techstars-BridgeForms-ConvertibleNote/Sec/Amend/0.md]
+TechStarsBridge.=[G/TechStars-BridgeForms-ConvertibleNote/Sec/Amend/0.md]
 
 MarsConstitution.=[G/MarsConstitution/Sec/Amend/0.md]
 

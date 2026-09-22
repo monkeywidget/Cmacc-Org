@@ -18,8 +18,6 @@ spec:
       labels:
         app: cmacc-legacy
     spec:
-      nodeSelector:
-        kubernetes.io/arch: arm64
       automountServiceAccountToken: false
       securityContext:
         runAsNonRoot: true
@@ -32,6 +30,12 @@ spec:
           # Built locally in OrbStack; update this digest after a deliberate rebuild.
           image: cmacc-legacy@sha256:8239f4056724561d76ec9b5580bac5c750933f25ec1339939b165570ed1510cf
           imagePullPolicy: Never
+          env:
+            # Deployment-specific repo links (GitHub / Compare); unset = links hidden.
+            - name: CMACC_REPO_URL
+              value: https://github.com/CommonAccord/Cmacc-Org
+            - name: CMACC_REPO_BRANCH
+              value: master
           ports:
             - name: http
               containerPort: 8080

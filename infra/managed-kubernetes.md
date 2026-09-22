@@ -53,8 +53,10 @@ flowchart LR
   - publish to an approved registry; reference as `<registry>/cmacc-legacy@sha256:<digest>`
   - drop the local-only "never pull" policy
 - **Architecture**
-  - current artifact arm64; node architecture must match
-  - amd64 base exists; an amd64 app build needs its own validation + digest
+  - build for the node architecture (`CMACC_PLATFORM`), or multi-arch
+  - locked artifact is arm64; an amd64 build needs its own validation + digest
+- **Repo links**
+  - set `CMACC_REPO_URL` / `CMACC_REPO_BRANCH` per deployment, or leave unset to hide them
 - **Access**
   - local = operator port-forward only
   - managed = deliberate exposure; nothing designed yet

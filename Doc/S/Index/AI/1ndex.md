@@ -1,4 +1,4 @@
-a16z-Microsoft:_AI-for-Startups.=[G/A16Z-AI-for-Startups/0.md]
+a16z-Microsoft:_AI-for-Startups.=[G/a16z-ai-for-startups/0.md]
 
 OpenSource_AI_Definition.=[G/OSAID/1.0-RC.md] /// Open Source Initiative's  AI Definition, release candidate 1.0.
 

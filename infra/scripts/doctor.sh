@@ -102,8 +102,9 @@ if have kubectl; then
       && [ -n "$nodes" ]; then
     ok kubernetes "$(echo "$nodes" | head -n 1 | tr -s ' ')"
     check_version kubernetes "$(echo "$nodes" | awk 'NR==1 {print $3}')"
-    echo "$nodes" | awk '{print $2}' | grep -qx arm64 \
-      || warn "arm64 node" "the local Deployment selects kubernetes.io/arch=arm64"
+    engine_arch=$(docker --context "$CONTEXT" info --format '{{.Architecture}}' 2>/dev/null | sed 's/aarch64/arm64/;s/x86_64/amd64/')
+    echo "$nodes" | awk '{print $2}' | grep -qx "$engine_arch" \
+      || warn "node architecture" "no node matches the build architecture ($engine_arch); set CMACC_PLATFORM"
   else
     bad kubernetes "cluster not reachable" "orbctl config set k8s.enable true && orbctl start k8s"
   fi
