@@ -137,7 +137,21 @@ task deploy              # apply manifest, wait for rollout
 task port-forward        # background forward to 127.0.0.1:8080
 task pulse               # smoke test through the forward
 task port-forward:stop   # stop the forward
-task up                  # build, deploy, port-forward, pulse
+task up                  # build, deploy the LOCKED image, port-forward, pulse
+task dev                 # build the working tree, deploy THAT build (override), forward, pulse
+```
+
+Diagnostics (save re-deriving commands):
+
+```bash
+task sweep                                  # render every template offline → TSV (ok/empty/missing_file/timeout)
+task sweep -- --changed                     # only templates changed vs HEAD
+task sweep -- -i <image> G/x.md G/y.md      # chosen templates, chosen image
+task sweep -- diff before.tsv after.tsv     # status counts + transitions
+task probe -- -l 5 '/i.php?v=l&f=G/' 'pattern'   # status, pattern counts, follow 5 links
+task diagrams [-- file.md ...]              # render-check Mermaid blocks; PNGs kept for review
+task test                                   # Python unit tests in the pinned image
+task vet -- pkg1 pkg2                       # PyPI + GitHub vetting table for new libraries
 ```
 
 - **lint-links**: deployed content must use relative links, never the legacy public host or `/i.php`; reviewed exceptions in an allow-list; runs before every build
@@ -151,6 +165,8 @@ task up                  # build, deploy, port-forward, pulse
   - refuses an image whose architecture matches no cluster node
   - renews a forward started by the task; manual forwards need a manual restart
 - **port-forward**: refuses a busy port; pid and log in `$TMPDIR`
+- **sweep**: legacy parser in a throwaway offline container; "Missing file" includes the OS error, so include loops show as "Too many open files"
+- **probe / diagrams / test / vet**: one-line diagnostics; `vet` is the only one that uses the network (PyPI, GitHub)
 - **pulse**:
   - fails on non-200, or on legacy error text in a 200 body
   - liveness only; not the acceptance checks

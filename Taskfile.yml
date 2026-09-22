@@ -59,6 +59,48 @@ tasks:
       - task: port-forward
       - task: pulse
 
+  dev:
+    desc: Build the working tree, deploy exactly that build (override), forward, pulse
+    vars:
+      TAG:
+        sh: echo "cmacc-legacy:dev-$(git rev-parse --short HEAD)"
+    cmds:
+      - task: lint-links
+      - task: lint-includes
+      - CMACC_IMAGE_TAG={{.TAG}} infra/scripts/build.sh
+      - CMACC_IMAGE={{.TAG}} infra/scripts/deploy.sh
+      - infra/scripts/port-forward.sh start
+      - infra/scripts/pulse.sh
+
+  sweep:
+    desc: "Render templates with the legacy parser offline; TSV of ok/empty/missing_file/timeout (args: -i image, --changed, templates; or: diff a.tsv b.tsv)"
+    cmds:
+      - infra/scripts/render-sweep.sh {{.CLI_ARGS}}
+    silent: true
+
+  probe:
+    desc: "Fetch a page from the running server; status, pattern counts, optional link check (args: [-l N] path [pattern ...])"
+    cmds:
+      - infra/scripts/probe.sh {{.CLI_ARGS}}
+    silent: true
+
+  diagrams:
+    desc: Render-check every Mermaid block (args = Markdown files; default all tracked docs); PNGs kept for review
+    cmds:
+      - infra/scripts/check-diagrams.sh {{.CLI_ARGS}}
+    silent: true
+
+  test:
+    desc: Run the Python unit tests in the pinned image
+    cmds:
+      - infra/scripts/pyrun.sh -m unittest discover -s tests/renderer {{.CLI_ARGS}}
+
+  vet:
+    desc: "Vet PyPI packages: version, release date, Python 3.14 support, license, GitHub stars/activity (args = package names)"
+    cmds:
+      - python3 tools/vet_packages.py {{.CLI_ARGS}}
+    silent: true
+
   pulse:
     desc: Smoke-test the locally running server (CMACC_BASE_URL, default http://127.0.0.1:8080; start 'task port-forward' first)
     cmds:
