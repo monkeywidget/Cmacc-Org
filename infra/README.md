@@ -139,6 +139,9 @@ task pulse               # smoke test through the forward
 task port-forward:stop   # stop the forward
 task up                  # build, deploy the LOCKED image, port-forward, pulse
 task dev                 # build the working tree, deploy THAT build (override), forward, pulse
+task app:dev             # Python app + templates images, deployed together, forward 8081, pulse
+task app:test            # Python app unit tests
+task app:sweep           # every template through the Python engine; fails on error/timeout
 ```
 
 Diagnostics (save re-deriving commands):

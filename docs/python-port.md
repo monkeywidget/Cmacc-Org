@@ -3,7 +3,12 @@
 - Goal: Python renderer at parity with the legacy PHP/Perl app
 - Principle: libraries wherever possible; custom code only where no library fits
 - Only open-source libraries that are currently active and widely adopted
-- Status: design only; no port code yet
+- Status: implemented (M5); see the app README for how it runs
+- Deviations from this design, decided during implementation:
+  - python-multipart dropped: form parsing via the standard library
+  - aiohttp / fsspec http dropped: remote includes via the standard library, in memory, with a timeout
+  - budgets added (nesting 1,000; lookups 1M; text 5M chars): one runaway template in the corpus is cut, nothing else
+  - `CSS.Special` treated as a stylesheet in every view (its only use in the corpus)
 
 ## The problem
 

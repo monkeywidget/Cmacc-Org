@@ -6,8 +6,9 @@ set -euo pipefail
 
 CONTEXT=${CMACC_CONTEXT:-orbstack}
 PORT=${CMACC_PORT:-8080}
+SERVICE=${CMACC_SERVICE:-cmacc-legacy}
 TMP=${TMPDIR:-/tmp}
-STATE=${TMP%/}/cmacc-port-forward
+STATE=${TMP%/}/cmacc-port-forward${CMACC_SERVICE:+-$CMACC_SERVICE}
 PIDFILE=$STATE.pid
 LOG=$STATE.log
 
@@ -37,7 +38,7 @@ if owner=$(lsof -nP -iTCP:"$PORT" -sTCP:LISTEN 2>/dev/null | awk 'NR==2 {print $
 fi
 
 nohup kubectl --context "$CONTEXT" -n cmacc-local port-forward \
-  --address 127.0.0.1 service/cmacc-legacy "$PORT:80" >"$LOG" 2>&1 &
+  --address 127.0.0.1 "service/$SERVICE" "$PORT:80" >"$LOG" 2>&1 &
 echo $! >"$PIDFILE"
 
 for _ in $(seq 50); do

@@ -1,0 +1,7 @@
+<!DOCTYPE html><head><title>{{ path }}</title><link href='{{ css }}' rel='stylesheet' /> <link rel='icon' href='vendor/png/CmA-Square.png'></head><body>
+{% if tabs %}{% include "tabs.html" %}<hr>{% endif %}
+{% for m in missing %}<!-- missing include: {{ m }} -->
+{% endfor %}{% if body %}{% if depth %}{% include "depth.html" %}{% endif %}
+{{ body }}
+{{ ("<br>" * 31) | safe }}{% else %}Nothing to Show{% endif %}
+</body>

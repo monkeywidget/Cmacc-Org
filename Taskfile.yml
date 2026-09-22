@@ -101,6 +101,30 @@ tasks:
       - python3 tools/vet_packages.py {{.CLI_ARGS}}
     silent: true
 
+  app:test:
+    desc: Python app unit tests (builds the test image first)
+    cmds:
+      - infra/scripts/app-image.sh test
+      - docker --context ${CMACC_CONTEXT:-orbstack} run --rm --pull=never --network none cmacc-app:test
+
+  app:dev:
+    desc: Build app + templates images, deploy both to the local cluster, forward to 127.0.0.1:8081, pulse
+    cmds:
+      - task: lint-links
+      - task: lint-includes
+      - infra/scripts/app-image.sh app
+      - infra/scripts/app-image.sh templates
+      - infra/scripts/app-deploy.sh
+      - CMACC_SERVICE=cmacc-app CMACC_PORT=8081 infra/scripts/port-forward.sh start
+      - CMACC_PORT=8081 infra/scripts/pulse.sh
+
+  app:sweep:
+    silent: true
+    desc: "Render every template with the Python engine; fails on any error or timeout (args: --mode plain|trace|xray, templates)"
+    cmds:
+      - infra/scripts/app-image.sh test
+      - docker --context ${CMACC_CONTEXT:-orbstack} run --rm --pull=never --network none --mount "type=bind,src=$PWD/Doc,dst=/data/Doc,readonly" cmacc-app:test python -m cmacc.sweep --store /data/Doc {{.CLI_ARGS}}
+
   pulse:
     desc: Smoke-test the locally running server (CMACC_BASE_URL, default http://127.0.0.1:8080; start 'task port-forward' first)
     cmds:

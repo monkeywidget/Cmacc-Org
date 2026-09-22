@@ -457,11 +457,11 @@ sequenceDiagram
 
 | Milestone | Outcome | Status |
 |---|---|---|
-| M1 Legacy on local Kubernetes | Pinned legacy image, corpus baked in, on local Kubernetes; developer tasks | Done |
-| M2 Compatibility suite | Black-box tests outside the app; any renderer vs any renderer | Prototype: one case, tool + unit tests; public baseline blocked by site outage |
-| M3 Deployment portability | Same image runs locally and on managed Kubernetes | Partial: probes, security context, limits, digest pinning; draft managed-cluster notes |
-| M4 Template storage abstraction | Filesystem (compatibility) and object storage backends | Not started |
-| M5 Python implementation | Python renderer; every template renders without error (parity not required); Perl stays in the legacy image | Design done |
+| M1 Legacy on local Kubernetes | Pinned legacy image, corpus baked in, on local Kubernetes; developer and diagnostic tasks | Done |
+| M2 Compatibility suite | Gate = every template renders without error (render sweep over the whole corpus); public-parity comparison optional, not a gate | Sweep in place for the legacy renderer; Python sweep with M5 |
+| M3 Deployment portability | Same image runs locally and on managed Kubernetes; no hardcoded hosts, paths, or architecture; no new CDN-hosted assets (out of scope) | Mostly done: relative links, case-exact includes, repo links from config, any-architecture builds, pre-build guards. Remaining: registry publishing |
+| M4 Template storage abstraction | Templates shipped as their own image, deployed alongside the server; store location from config (object storage later by URL) | Done: templates image + init container into a Pod volume; fsspec store from settings |
+| M5 Python implementation | Python renderer; every template renders without error (parity not required); Perl stays in the legacy image | Done: all views ported; 5,236 templates render with 0 errors / 0 timeouts; deployed locally next to legacy |
 | M6 Managed Kubernetes + identity | Managed cluster via infrastructure as code; human sign-in; per-workload managed identities | Not started |
 | M7 Templates cloud-only | Corpus in object storage with versions and roles; out of images and repo | Not started; needs explicit approval |
 | M8 Workflow engines | Human edit workflow; agent ingestion in Temporal; in-cluster agents | Not started |

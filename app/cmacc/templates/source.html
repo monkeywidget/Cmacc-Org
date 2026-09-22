@@ -1,0 +1,10 @@
+{% include "header.html" %}
+<body style="margin:20;padding:0">
+{% include "tabs.html" %}
+{% if notice %}<h1>{{ notice }}</h1><br>{% endif %}
+{% if error %}<span style="color: red">{{ error }}</span>{% endif %}
+<div><table class='TFtable'>
+{% for k, v in rows %}<tr id="{{ k | striptags }}"><td class='table-key-source'>{{ k }}</td><td width='20px' align='center' valign='top'> = </td><td class='table-value-source'>{{ v }}</td></tr>
+{% endfor %}</table></div>
+{{ ("<br>" * 36) | safe }}
+</body>

@@ -1,0 +1,11 @@
+{% include "header.html" %}
+<body style="margin:20;padding:0">
+{% include "tabs.html" %}
+{% if error %}<span style="color: red">{{ error }}</span>{% endif %}
+<h4>JSON source view:</h4>
+{<ul type='none'><li>"edges" : [ <ul type='none'><li>
+{% for k, target in edges %}[ {% if k %}"{{ k }}" : {% else %}"" : {% endif %}"<a href=i.php?v=j&f={{ target }}>{{ target }}</a>" ] , {% endfor %}
+<br>]</ul>"data" {<ul type='none'><li>
+{% for k, v in data %}"{{ k }}" : "{{ v }}" ,<br><br>
+{% endfor %}<br>}</ul></ul>}
+</body>

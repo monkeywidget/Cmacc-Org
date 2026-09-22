@@ -27,14 +27,15 @@ def pypi(name):
     info = data["info"]
     files = data["releases"].get(info["version"], [])
     urls = " ".join((info.get("project_urls") or {}).values()) + " " + (info.get("home_page") or "")
-    repo = re.search(r"github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?(?:/|\s|$)", urls)
+    repos = re.findall(r"github\.com/([\w.-]+/[\w.-]+?)(?:\.git)?(?:/|\s|$)", urls)
+    repo = next((r for r in repos if not r.startswith("sponsors/")), None)
     return {
         "name": info["name"], "version": info["version"],
         "released": max((f["upload_time"] for f in files), default="?")[:10],
         "python": info.get("requires_python") or "?",
         "target": "yes" if any(f"Python :: {TARGET_PYTHON}" in c for c in info["classifiers"]) else "not listed",
         "license": (info.get("license_expression") or info.get("license") or "?")[:18],
-        "repo": repo.group(1) if repo else None,
+        "repo": repo,
     }
 
 
