@@ -18,8 +18,11 @@ CHECKS="
 /i.php?${DOC}G/YCombinator-SAFE/2026/Demo/Acme-Ang-Cap-NoDiscount.md|SAFE render
 "
 
-body=$(mktemp "${TMPDIR:-/tmp}/cmacc-pulse.XXXXXX")
-err=$(mktemp "${TMPDIR:-/tmp}/cmacc-pulse.XXXXXX")
+# In-progress files live in the repo's git-ignored workspace, never $TMPDIR or /tmp.
+WORK=${CMACC_WORK:-$(cd "$(dirname "$0")/../.." && pwd)/.agent-work/tmp}
+mkdir -p "$WORK/pulse"
+body=$(mktemp "$WORK/pulse/body.XXXXXX")
+err=$(mktemp "$WORK/pulse/err.XXXXXX")
 trap 'rm -f "$body" "$err"' EXIT
 
 echo "Pulse: $BASE"

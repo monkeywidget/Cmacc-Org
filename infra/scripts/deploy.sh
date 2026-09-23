@@ -45,8 +45,7 @@ echo "$running" | grep -q "$DIGEST" || {
 echo "Deployed $IMAGE."
 
 # A Service port-forward stays attached to the Pod it started with; renew ours.
-TMP=${TMPDIR:-/tmp}
-pid=$(cat "${TMP%/}/cmacc-port-forward.pid" 2>/dev/null || true)
+pid=$(cat "${CMACC_WORK:-$PWD/.agent-work/tmp}/port-forward/cmacc-legacy.pid" 2>/dev/null || true)
 if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
   infra/scripts/port-forward.sh start
 else

@@ -167,7 +167,8 @@ task vet -- pkg1 pkg2                       # PyPI + GitHub vetting table for ne
   - always deploys by digest, so a rebuilt tag rolls out
   - refuses an image whose architecture matches no cluster node
   - renews a forward started by the task; manual forwards need a manual restart
-- **port-forward**: refuses a busy port; pid and log in `$TMPDIR`
+- **port-forward**: refuses a busy port; pid and log in `.agent-work/tmp/port-forward/`
+- In-progress files (diagram PNGs, forward pid/logs, pulse responses) all go to the git-ignored `.agent-work/tmp/`; override with `CMACC_WORK`
 - **sweep**: legacy parser in a throwaway offline container; "Missing file" includes the OS error, so include loops show as "Too many open files"
 - **probe / diagrams / test / vet**: one-line diagnostics; `vet` is the only one that uses the network (PyPI, GitHub)
 - **pulse**:

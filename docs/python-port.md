@@ -1,14 +1,9 @@
 # Python port: problem breakdown and libraries
 
-- Goal: Python renderer at parity with the legacy PHP/Perl app
+- Goal: a Python renderer where every template renders without error (no byte parity with Perl)
 - Principle: libraries wherever possible; custom code only where no library fits
 - Only open-source libraries that are currently active and widely adopted
 - Status: implemented (M5); see the app README for how it runs
-- Deviations from this design, decided during implementation:
-  - python-multipart dropped: form parsing via the standard library
-  - aiohttp / fsspec http dropped: remote includes via the standard library, in memory, with a timeout
-  - budgets added (nesting 1,000; lookups 1M; text 5M chars): one runaway template in the corpus is cut, nothing else
-  - `CSS.Special` treated as a stylesheet in every view (its only use in the corpus)
 
 ## The problem
 
@@ -98,11 +93,13 @@ flowchart TB
 | Part | Choice | Why | Custom code left |
 |---|---|---|---|
 | 1 Routing | FastAPI | typed params, same URLs, OpenAPI schemas reused later by the tool gateway | route table |
-| 2 Store | fsspec (+ adlfs, s3fs, http) | one interface for local, Azure Blob, S3, and remote includes; covers the storage-abstraction goal | store root config |
+| 2 Store | fsspec (+ adlfs, s3fs) | one interface for local, Azure Blob, S3; covers the storage-abstraction goal | store root config |
+| Remote includes | stdlib `urllib` | fetched in memory with a timeout; open fetching (no allow-list) | a few lines |
 | 3 Parsing | stdlib `re` | three regexes; a parser library adds nothing | ~20 lines |
 | 4 Engine | stdlib (`re`, `functools`) | no library implements ProseObject resolution; it is the domain | ~80 lines |
 | 5–6 Modes | stdlib | a hook on the engine instead of seven copies | ~60 lines |
-| 7–8 Pages | Jinja2 | standard templating, autoescape control (values contain intended HTML) | templates |
+| 7–8 Pages | Jinja2 | standard templating, autoescape control (values contain intended HTML); heavily used (MarkupSafe ≈ 600M downloads a month); moderate saving: ≈ 90 template lines vs ≈ 130–160 lines of hand-built HTML; no smaller active alternative | templates |
+| Forms (saves) | stdlib `urllib.parse` | parses the form body; no extra dependency | a few lines |
 | Config | pydantic-settings | env-based settings: store backend, root, remote-include policy | one settings class |
 | Server | uvicorn | standard ASGI server | none |
 | 11 Tests | pytest, hypothesis | render sweep over every template; generated inputs for cycle/termination | test cases |
@@ -121,7 +118,8 @@ flowchart TB
 | fsspec | 2026.9.0 | 2026-09 | 3.14 listed | 1.4k / 2026-09 | use; core of pandas/dask/xarray I/O |
 | adlfs | 2026.8.0 | 2026-08 | 3.14 listed | 0.2k / 2026-08 | use for Azure |
 | s3fs | 2026.9.0 | 2026-09 | 3.14 listed | 1k / 2026-09 | use for S3-compatible / local emulators |
-| aiohttp | 3.14.3 | 2026-07 | 3.14 listed | 16.6k / 2026-09 | use (fsspec http) |
+| aiohttp | 3.14.3 | 2026-07 | 3.14 listed | 16.6k / 2026-09 | not needed: remote includes use the standard library |
+| python-multipart | 0.0.32 | 2026-06 | 3.14 listed | 0.5k / 2026-09 | not needed: forms parsed with the standard library |
 | pytest | 9.1.1 | 2026-06 | 3.14 listed | 14.5k / 2026-09 | use |
 | hypothesis | 6.168.0 | 2026-09 | 3.14 listed | 9k / 2026-09 | use |
 | syrupy | 6.1.1 | 2026-09 | 3.14 listed | 0.9k / 2026-09 | dropped: no parity snapshots needed |
@@ -166,7 +164,12 @@ flowchart TB
   - corpus references now match real paths exactly; a pre-build check keeps it that way
 - Missing include targets: 114 templates still reference content not in the store (older sibling repos, deleted example parties)
   - report and keep rendering; these templates must still render
+  - the content itself belongs to the legal users; recovering it is not renderer work
 - Include loops: at least one template loops forever in the legacy parser (misreported as a missing file); 15 templates hit a 20-second limit
+- Budgets per render stop runaway templates: nesting 1,000, lookups 1M, text 5M characters
+  - past a budget the placeholder stays unresolved and the cut is counted
+  - measured on the corpus: deepest real nesting 263; one runaway template is cut, nothing else
+- `CSS.Special` is treated as a stylesheet in every view (its only use in the corpus)
 - Remote includes (18 objects use `http` targets) → fetched with a timeout; failure = missing include, page still renders
 - Keep the legacy semantics authors rely on: first matching line wins, prefixed inheritance, placeholders re-resolve from the root document with the accumulated prefix
 - Save endpoints kept: source and JSON views write through the store (line endings normalized, trimmed)
@@ -222,7 +225,7 @@ flowchart LR
 - Loop guard on includes and placeholders; emit the placeholder unresolved
 - Missing include = reported, rest of the page renders (fixes the remaining 114 without corpus changes)
 - Case-sensitive store access; no case-folding fallbacks
-- Browser assets (CSS, scripts) served locally from pinned copies, not public CDNs
+- Browser assets: the legacy CDN references stay as they are; no new CDN-hosted assets
 - Relative links only in generated pages, so the app works under any host or subdirectory
 - Image builds for any architecture, reusing the platform-from-engine build behavior
 - Existing corpus checks (no legacy-host or root-relative links; exact include paths) keep running before every build, whichever renderer ships
@@ -231,18 +234,3 @@ flowchart LR
 
 - Custom Python: roughly 300–400 lines (engine, modes, routes) plus templates
 - Legacy equivalent: about 2,500 lines across PHP views and seven parser copies
-
-## Decisions (2026-09-22)
-
-- Jinja2: kept
-  - still heavily used (companion library MarkupSafe ≈ 600M downloads a month; issue tracker active this week)
-  - saves a moderate amount, not a large one: shared page layout, loops, and autoescaping, roughly 90 template lines vs roughly 130–160 lines of hand-built HTML strings
-  - no active alternative is smaller
-- Parity: not required; render-without-error is the bar
-- Save endpoints: included in the port
-- Remote includes: open fetching, with timeout and graceful failure
-
-## Open decisions
-
-- Remaining missing include targets: recover content from older repos, or leave as reported gaps
-- Remote-include policy: open fetching vs an allow-list

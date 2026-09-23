@@ -7,8 +7,10 @@ set -euo pipefail
 CONTEXT=${CMACC_CONTEXT:-orbstack}
 PORT=${CMACC_PORT:-8080}
 SERVICE=${CMACC_SERVICE:-cmacc-legacy}
-TMP=${TMPDIR:-/tmp}
-STATE=${TMP%/}/cmacc-port-forward${CMACC_SERVICE:+-$CMACC_SERVICE}
+# In-progress files live in the repo's git-ignored workspace, never $TMPDIR or /tmp.
+WORK=${CMACC_WORK:-$(cd "$(dirname "$0")/../.." && pwd)/.agent-work/tmp}
+mkdir -p "$WORK/port-forward"
+STATE=$WORK/port-forward/$SERVICE
 PIDFILE=$STATE.pid
 LOG=$STATE.log
 

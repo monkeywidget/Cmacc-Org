@@ -1,9 +1,9 @@
 # Running on managed Kubernetes
 
-- Status: draft
-- Known facts only, from the local OrbStack deployment
-- Decided: Azure AKS, images in Azure Container Registry (ACR); CI chosen with the first deploy
-- Network and ingress details not decided; left out on purpose
+- Status: draft; constraints of the legacy image on a managed cluster
+- The Python app is what goes to AKS; its design is in the infrastructure document (docs)
+- Target: AKS on Azure, images in Azure Container Registry (ACR), ingress through AKS app routing (Gateway API)
+- DNS and TLS details not decided; left out on purpose
 
 ## Target shape
 
@@ -15,7 +15,7 @@ flowchart LR
   build["Validated image<br/>by digest"]
   reg[("Azure Container Registry")]
   users["Users"]
-  entry["Ingress / DNS / TLS<br/>not decided"]
+  entry["Gateway (app routing)<br/>DNS / TLS not decided"]
   remote[("Remote documents")]
 
   subgraph cluster["AKS cluster"]
@@ -54,13 +54,13 @@ flowchart LR
   - publish to ACR; reference as `<registry>.azurecr.io/<image>@sha256:<digest>`
   - drop the local-only "never pull" policy
 - **Architecture**
-  - build for the node architecture (`CMACC_PLATFORM`), or multi-arch
-  - locked artifact is arm64; an amd64 build needs its own validation + digest
+  - build for both amd64 and arm64: the cluster may start either kind of node
+  - locked artifact is arm64; the amd64 build needs its own validation + digest
 - **Repo links**
   - set `CMACC_REPO_URL` / `CMACC_REPO_BRANCH` per deployment, or leave unset to hide them
 - **Access**
   - local = operator port-forward only
-  - managed = deliberate exposure; nothing designed yet
+  - managed = signed-in only, through the sign-in proxy (see the access-control document)
 
 ## Legacy constraints
 
@@ -98,9 +98,7 @@ flowchart LR
 
 ## Not yet decided
 
-- CI platform, and how it pushes to ACR
-- Target node architecture
-- Ingress, DNS, TLS
-- Access control for save endpoints
+- CI platform, and how it pushes to ACR (chosen with the first deploy)
+- DNS and TLS
 - Storage for edits, if any
 - Relationship to the existing DigitalOcean SSH deploy

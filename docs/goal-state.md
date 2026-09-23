@@ -7,7 +7,8 @@
 ## Goal state summary
 
 - App fully containerized, deployed to managed Kubernetes
-- App state in a managed database, only if the architecture requires it
+- App state in a managed database (per-template grants to start)
+- Signed-in only: one installation per firm, accounts for its people, sign-in handled before the app
 - Templates stored as cloud objects
   - not checked into the repo
   - not baked into images
@@ -107,6 +108,7 @@ flowchart LR
 
 ## Workload identities and permissions
 
+- Details for agents: [agent-identities.md](agent-identities.md)
 - Every in-cluster workload gets its own identity; no shared keys
 - Azure example: Kubernetes service account → federated → its own user-assigned managed identity
 - Permissions granted to identities, scoped as narrowly as each job needs
@@ -293,6 +295,7 @@ sequenceDiagram
 sequenceDiagram
   actor U as User
   participant S as Slack
+  participant B as Slack bridge<br/>(Socket Mode)
   participant N as n8n workflow
   participant LC as LangChain agent node<br/>(in n8n)
   participant L as Inference service
@@ -301,7 +304,8 @@ sequenceDiagram
   participant API as App API layer
 
   U->>S: question in channel or DM
-  S->>N: event webhook
+  S->>B: event over the bridge's outbound connection
+  B->>N: event (in-cluster webhook, not public)
   N->>N: map Slack user → org identity + roles
   N->>LC: prompt + user context
   LC->>G: fetch tool catalog (allowed for this user)
@@ -327,8 +331,9 @@ sequenceDiagram
 - App pods hold no templates; they read published objects from Blob Storage
 - API layer is the only component with storage access
 - n8n and agents reach capabilities through the gateway, never storage directly
-- Every workload authenticates with its own managed identity; no stored secrets
-- Managed DB only if app state (e.g. form states, sessions) needs it
+- Every workload authenticates with its own managed identity; the few remaining secrets are synced from Key Vault
+- Managed PostgreSQL for app state (per-template grants), reachable only from inside the cluster
+- Slack connects outbound (Socket Mode through a small bridge); no public webhook
 
 ```mermaid
 flowchart LR
@@ -341,6 +346,7 @@ flowchart LR
     subgraph aks["AKS cluster"]
       subgraph wfns["namespace: workflows"]
         n8n["n8n<br/>LangChain agent node<br/>+ tool flows"]
+        bridge["Slack bridge<br/>Socket Mode"]
         tmp["Temporal"]
       end
       subgraph agns["namespace: agents"]
@@ -356,7 +362,7 @@ flowchart LR
 
     subgraph data["Azure data services"]
       blob[("Blob Storage<br/>published + staging")]
-      pg[("PostgreSQL<br/>if needed")]
+      pg[("PostgreSQL<br/>private")]
     end
 
     subgraph platform["Azure platform services"]
@@ -367,9 +373,9 @@ flowchart LR
   end
 
   user --> edge
-  slack -->|"events"| edge
+  bridge -->|"outbound Socket Mode"| slack
+  bridge -->|"events"| n8n
   edge --> ui
-  edge -->|"webhook"| n8n
   tmp <-->|"task queues"| workers
 
   n8n ==>|"tool calls"| gw
@@ -383,12 +389,13 @@ flowchart LR
 
   n8n -.->|"inference"| llm
   workers -.->|"inference"| llm
-  n8n -.->|"secrets"| kv
+  kv -.->|"secret sync"| wfns
   acr -.->|"pull by digest"| aks
 ```
 
 ## Human user sign-in (Azure example)
 
+- Roles, groups, and per-template permissions: [access-control.md](access-control.md)
 - People sign in with Entra ID (OIDC), with organization policies such as MFA applied there
 - Managed identities cover the workloads: the app uses its own identity to reach storage
 - The app never holds user passwords or storage keys
@@ -421,16 +428,17 @@ sequenceDiagram
 ## Admin deploying the system (Azure example)
 
 - Admin elevates just in time; no standing owner rights
-- Infrastructure as code creates cloud resources, identities, and role assignments; tool not chosen yet
+- Terraform creates cloud resources, identities, and role assignments
 - CI builds and validates images, pushes by digest
-- Cluster changes applied from the repository (e.g. GitOps), not by hand
+- Cluster components deployed by scripts; new versions rolled out in stages (5 → 20 → 50 → 75 → 100%)
+- Details: [infrastructure.md](infrastructure.md)
 - Compatibility suite runs against the new deployment before traffic moves
 
 ```mermaid
 sequenceDiagram
   actor Ad as Admin
   participant ID as Entra ID
-  participant IaC as Infrastructure as code
+  participant IaC as Terraform
   participant ARM as Azure Resource Manager
   participant CI as CI pipeline
   participant ACR as Container Registry
@@ -470,14 +478,11 @@ sequenceDiagram
 
 - CI platform (chosen with the first AKS deploy)
 - Workflow engine for human edit workflows: n8n or Temporal
-- Whether app state needs a database, and which state
-- Infrastructure-as-code tool; GitOps or pipeline-driven deploys
 - Inference provider and model
 - Gateway protocol: MCP itself or MCP-like
 - Tool catalog: operations, schemas, side-effect classes per tool
-- How chat identities map to org identities
+- How a chat (Slack) user is linked to their Entra identity (linking itself is required; see agent-identities)
 - Review tooling form: part of the app UI, separate tool, or both
 - Template versioning and object layout
-- Role model: who can author, review, publish; agent limits
-- Public read access vs signed-in only
+- Agent limits beyond read and propose (roles for people: [access-control.md](access-control.md))
 - Chat front ends beyond Slack
