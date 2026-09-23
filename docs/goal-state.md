@@ -470,7 +470,7 @@ sequenceDiagram
 - Removing templates from the repo and images changes the project's current contract
   - needs explicit approval at that point
   - filesystem backend stays as the compatibility option until then
-- Current save endpoints write to the corpus; replaced by reviewed workflows before public exposure
+- Current save endpoints write to the corpus with no role checks; disabled or role-checked before users get access, later replaced by reviewed workflows
 - Agents never publish; a human decision is always recorded
 - Nothing here requires installing PHP or Perl on a workstation
 

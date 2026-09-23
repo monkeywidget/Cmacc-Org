@@ -60,7 +60,7 @@ flowchart LR
   s75 -.-> abort
 ```
 
-- Checks per stage: pulse against the canary (via the version header); at 5% also the page smoke test
+- Checks per stage: the canary Pods' running image IDs match the release record; pulse against the canary (via the version header); at 5% also the page smoke test
 - Every page is behind sign-in: liveness checks use a health route exempt from sign-in; page smoke tests sign in with a dedicated test account
 - Checks retry before aborting (a spot eviction mid-stage looks like a failure; see the spot notes in the infrastructure document)
 - Abort and promote are the same operation: change weights, then tidy up tracks

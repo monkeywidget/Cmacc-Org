@@ -151,4 +151,5 @@ sequenceDiagram
 
 ## Open questions
 
+- Save endpoints: the app does not check roles on saves yet, so any signed-in user could save; disable saves or enforce the editor and admin roles before users get access
 - People in more than 200 groups: the proxy needs consent to read their full group list from Microsoft Graph

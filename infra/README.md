@@ -276,5 +276,5 @@ kubectl --context orbstack -n cmacc-local rollout restart deployment/cmacc-legac
 
 ## Next deployments
 
-- Managed cluster draft: [managed-kubernetes.md](managed-kubernetes.md)
+- From local to AKS (what carries over, what changes): [infrastructure.md](../docs/infrastructure.md)
 - Git is operator-only: agents inspect, never stage, commit, branch, or push

@@ -197,6 +197,7 @@ flowchart LR
 ## Carried over from local
 
 - Same images and settings as local; only the registry and pull policy differ
+- Deployed: the Python app and the templates image; the legacy PHP/Perl image stays local as the behavioral reference
 - Templates image copied into a Pod volume at start (M4); saves are disposable and per track
 - Each pod: sign-in proxy + app, with the templates copied in at start
 - Inside the cluster, a network policy lets only the app's pods reach the database
@@ -223,3 +224,4 @@ flowchart LR
 - Which Entra tenant each firm installation uses, and who owns its app registration
 - Deploy cluster for future rollouts (unspecified)
 - CI platform (with the first deploy)
+- Cutover from the existing DigitalOcean deploy of the legacy app
