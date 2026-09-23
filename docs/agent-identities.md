@@ -79,6 +79,22 @@ sequenceDiagram
 - Agent-only work (e.g. ingestion with no person behind it) uses only the agent's own permissions
 - Publishing always needs a person with the right template role; an agent can prepare, never approve
 
+## Agents changing templates
+
+- Agents only propose changes; a template admin publishes them
+
+```mermaid
+flowchart LR
+  src["Source material"] --> ing["Ingestion agent<br/>(own identity)"]
+  ing -->|"propose tool<br/>(app role, allow-list)"| gw["Tool gateway"]
+  gw --> api["App API"]
+  api --> staging[("Proposals<br/>(staging)")]
+  admin["Template admin<br/>(person's identity)"] -->|"review, publish"| api
+  api --> published[("Published templates")]
+  gw -.->|"audit"| logs[("Azure Monitor Logs")]
+  api -.->|"audit"| logs
+```
+
 ## Lifecycle
 
 - **Add an agent type:** identity + federated credential + role assignments + Entra app roles (Terraform); service account (deploy scripts); tool allow-list entries approved by admins
@@ -87,6 +103,15 @@ sequenceDiagram
 - **Switch it off now:** delete its federated credential; new tokens are refused within minutes
 - **Retire it:** remove the service account, identity, and allow-list entry
 - Limit to plan around: 20 federated credentials per managed identity
+
+```mermaid
+flowchart LR
+  tf["Terraform<br/>identity, federated credential,<br/>app roles"] --> sa["Deploy scripts<br/>service account"]
+  sa --> run["Agent running<br/>(short-lived tokens)"]
+  approve["Admin approves a tool"] --> allow["Gateway allow-list"]
+  allow --> run
+  off["Delete the federated credential"] -.->|"switch off:<br/>no new tokens"| run
+```
 
 ## Open questions
 

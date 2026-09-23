@@ -46,6 +46,36 @@ flowchart LR
 - **Kubernetes:** AKS Automatic uses Entra ID with Azure RBAC for cluster access; no Kubernetes-local accounts
 - **Azure resources:** Azure RBAC on the resource group, registry, and state storage
 
+## Changing a template: who may do what
+
+- Editors propose; template admins review and publish; every step is checked against the grants and audited
+
+```mermaid
+sequenceDiagram
+  actor Ed as Template editor
+  actor Ad as Template admin
+  participant P as Sign-in proxy
+  participant A as App / API layer
+  participant DB as Grants database
+  participant S as Template store
+  participant L as Azure Monitor Logs
+
+  Ed->>P: propose an edit
+  P->>A: request + editor's identity
+  A->>DB: editor (or admin) on this template or folder?
+  A->>S: save as a proposal (draft)
+  A->>L: audit: proposal
+  Ad->>P: review the proposal
+  P->>A: request + admin's identity
+  A->>DB: admin on this template or folder?
+  alt approve
+    A->>S: publish
+    A->>L: audit: publish
+  else request changes
+    A-->>Ed: returned with notes
+  end
+```
+
 ## System admin sub-roles
 
 | Sub-role | Does | Azure roles (proposed, built-in) | Scope |
@@ -58,6 +88,19 @@ flowchart LR
 - Devops includes the deployer sub-role today (one team); the split lets the future deploy cluster hold only deployer rights
 - Cluster admin is time-limited elevation (Entra Privileged Identity Management), not standing membership
 - The cluster's own identity only pulls images (AcrPull); it has no other rights
+
+```mermaid
+flowchart LR
+  admin["System admin"] -->|"sign in (MFA)"| entra["Entra ID"]
+  entra -->|"group membership<br/>(approved by admins)"| roles["Azure roles<br/>per sub-role"]
+  entra -.->|"just-in-time elevation<br/>(PIM, time-limited)"| cadmin["Cluster admin"]
+  roles -->|"devops"| rg["Resource group<br/>+ Terraform state"]
+  roles -->|"deployer"| acr[("Registry: push")]
+  roles -->|"deployer"| ns["Cluster: app namespace"]
+  roles -->|"devops, over VPN"| kv[("Key Vault: secrets")]
+  roles -->|"operator"| read["Read-only views"]
+  cadmin --> cluster["Whole cluster"]
+```
 
 ## Groups (proposed names)
 
@@ -73,6 +116,16 @@ flowchart LR
 - Recorded with who, what, when: sign-ins, per-template grants and removals, publishes, role elevation, deployments
 - Stored in Azure Monitor Logs (the installation's Log Analytics workspace)
 - System changes (Terraform, releases) are also recorded in the repository history
+
+```mermaid
+flowchart LR
+  proxy["Sign-in proxy<br/>sign-ins"] --> logs[("Azure Monitor Logs")]
+  app["App / API layer<br/>grants, proposals, publishes"] --> logs
+  gw["Tool gateway<br/>agent actions"] --> logs
+  entra["Entra ID<br/>sign-ins, role elevation"] --> logs
+  kv["Key Vault<br/>secret reads, changes"] --> logs
+  rel["Rollout script<br/>releases"] --> logs
+```
 
 ## Sign-in flow
 

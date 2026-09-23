@@ -67,6 +67,67 @@ flowchart LR
 - State: remote, in an Azure Storage account created once before the first apply
 - Not in Terraform: images, containers, node pool rules, gateway, routes, the secret sync job (all installed by deploy scripts)
 
+```mermaid
+sequenceDiagram
+  actor D as Devops
+  participant E as Entra ID
+  participant T as Terraform (devops machine)
+  participant S as State storage
+  participant A as Azure Resource Manager
+
+  D->>E: sign in (MFA)
+  D->>T: plan / apply
+  T->>S: lock and read state (Storage Blob Data Contributor)
+  T->>A: create or change resources (Contributor, RBAC Administrator)
+  A-->>T: result
+  T->>S: write state (no secret values in it)
+```
+
+## Network layout
+
+- Firm users reach the app through the gateway; everything else stays on the private network where possible
+- Admins reach private resources (the vault) only over the VPN
+- Outbound traffic (Slack, remote documents) leaves through the NAT gateway; nothing listens publicly for it
+
+```mermaid
+flowchart LR
+  users["Firm users<br/>(browser)"]
+  admins["Admins"]
+  slack["Slack"]
+  remote[("Remote documents")]
+
+  subgraph azure["Azure: one installation"]
+    subgraph vnet["Virtual network"]
+      subgraph aksnet["Cluster"]
+        gw["Gateway<br/>(app routing)"]
+        pods["App pods<br/>sign-in proxy + app"]
+        wf["n8n, Slack bridge,<br/>agents, secret sync"]
+      end
+      pg[("PostgreSQL<br/>private")]
+      kvpe["Key Vault<br/>private endpoint"]
+      vpngw["VPN gateway"]
+    end
+    lb["Public IP +<br/>load balancer"]
+    nat["NAT gateway<br/>(outbound)"]
+    acr[("Container registry")]
+    entra["Entra ID"]
+    logs[("Log Analytics")]
+  end
+
+  users -->|"HTTPS"| lb --> gw --> pods
+  users -.->|"sign in"| entra
+  admins -->|"VPN, Entra sign-in"| vpngw --> kvpe
+  pods -->|"private"| pg
+  wf -->|"private"| pg
+  wf -->|"read secrets"| kvpe
+  wf --> nat
+  pods --> nat
+  nat -->|"outbound only"| slack
+  nat --> remote
+  acr -->|"image pulls"| aksnet
+  aksnet -.->|"logs"| logs
+```
+
 ## Compute: cheapest, flexible
 
 - Automatic's system nodes are Microsoft-hosted and not billed to the subscription
@@ -76,6 +137,14 @@ flowchart LR
   - small general-purpose sizes only, with a total CPU cap so costs cannot run away
 - Needs multi-architecture images: every image is built for amd64 and arm64
 - Spot trade-offs: see "Spot: planning notes" below
+
+```mermaid
+flowchart LR
+  pending["Pod needs a node"] --> nap["Node auto-provisioning<br/>(cheap pool rules, CPU cap)"]
+  nap -->|"spot available"| spot["Spot VM<br/>amd64 or arm64"]
+  nap -->|"no spot capacity"| od["On-demand VM"]
+  spot -.->|"evicted, ~30 s notice"| pending
+```
 
 ## Related documents
 
@@ -133,6 +202,17 @@ flowchart LR
 - Inside the cluster, a network policy lets only the app's pods reach the database
 - Secrets arrive through a sync job from the vault (External Secrets Operator), per namespace
 - Pulse and render sweep work against any base URL
+
+```mermaid
+flowchart LR
+  timg[("Templates image<br/>(registry)")] -->|"copied at start"| vol[("Pod volume<br/>templates")]
+  user["Firm user"] --> proxy["Sign-in proxy"]
+  secret[("Synced secret<br/>cookie key")] --> proxy
+  proxy -->|"signed-in user"| app["App"]
+  app -->|"read"| vol
+  app -->|"save (disposable)"| vol
+  app -->|"Entra token"| pg[("PostgreSQL<br/>grants")]
+```
 
 ## Open items
 

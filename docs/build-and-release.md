@@ -22,7 +22,10 @@ flowchart LR
   tests --> images["App + templates images<br/>amd64 + arm64"]
   images --> acr[("ACR<br/>tag = revision")]
   acr --> record["Release record<br/>revision + digests"]
+  signin["Builder's Entra sign-in<br/>(AcrPush)"] -.->|"push rights"| acr
 ```
+
+- The templates image is how template changes ship: a new corpus revision becomes a new templates image and rolls out like any release
 
 ## Release: stable and canary tracks
 
@@ -62,6 +65,33 @@ flowchart LR
 - Checks retry before aborting (a spot eviction mid-stage looks like a failure; see the spot notes in the infrastructure document)
 - Abort and promote are the same operation: change weights, then tidy up tracks
 
+```mermaid
+sequenceDiagram
+  participant R as Rollout script
+  participant V as Key Vault (over VPN)
+  participant E as Entra ID
+  participant G as Gateway
+  participant P as Sign-in proxy (canary)
+  participant A as App (canary)
+  participant K as AKS API
+
+  R->>G: health route + version header
+  G->>P: forward to canary
+  P->>A: health route (no sign-in)
+  A-->>R: healthy?
+  R->>V: read test account password
+  R->>E: sign in as the test account
+  E-->>R: session
+  R->>G: page requests + version header + session
+  G->>P: forward to canary
+  P->>A: request as the test user
+  A-->>R: pages render?
+  alt all checks pass
+    R->>K: set route weights for the next stage
+  else checks fail after retries
+    R->>K: canary weight back to 0%
+  end
+```
 ## A/B experiments
 
 - Same mechanism: the canary track runs the B version; its weight sets the exposure
@@ -73,3 +103,12 @@ flowchart LR
 - Build and release run from the devops machine for now
 - The same scripts move to a deploy cluster later (unspecified); CI is chosen with the first deploy
 - Permissions needed: push to the registry (build), change workloads and routes in the app namespace (release); see [access-control.md](access-control.md)
+
+```mermaid
+flowchart LR
+  runner["Devops machine<br/>(deploy cluster later)"] -->|"sign in"| entra["Entra ID"]
+  runner -->|"push images<br/>AcrPush"| acr[("Container registry")]
+  runner -->|"deploy tracks, set weights<br/>RBAC Writer, app namespace"| k8s["AKS API"]
+  runner -->|"test account password<br/>over VPN"| kv[("Key Vault")]
+  k8s -->|"pull by digest"| acr
+```

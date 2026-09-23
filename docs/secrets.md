@@ -69,12 +69,51 @@ flowchart LR
 - Setting or changing a secret value is always done over the VPN, by devops
 - The sync job reaches the vault from inside the same network; it needs no VPN
 
+```mermaid
+sequenceDiagram
+  actor D as Devops
+  participant V as VPN gateway
+  participant E as Entra ID
+  participant K as Key Vault (private endpoint)
+  participant L as Azure Monitor Logs
+  participant S as Secret sync job
+
+  D->>V: connect (point-to-site)
+  V->>E: sign in (MFA, admin group)
+  E-->>V: allowed
+  D->>K: set or change a secret (Key Vault Secrets Officer)
+  K->>L: log the change
+  S->>K: next refresh reads the new value
+```
+
 ## Database connections
 
 - **Server:** signs in to PostgreSQL with Entra ID as its workload identity; the database role maps to that identity; nothing stored
 - **n8n:** has no Entra sign-in for its database; uses its own database user with a password from the vault
 - Each service has its own database and user; neither can read the other's data
 - The database is reachable only from inside the cluster (private network, network policy); a stolen password alone cannot reach it
+
+```mermaid
+flowchart LR
+  subgraph appns["namespace: app"]
+    server["Server"]
+  end
+  subgraph wf["namespace: workflows"]
+    n8n["n8n"]
+    ks[("Synced secret<br/>pg-n8n-password")]
+  end
+  entra["Entra ID"]
+  subgraph pg["PostgreSQL (private)"]
+    appdb[("app database")]
+    n8ndb[("n8n database")]
+  end
+
+  server -->|"workload identity"| entra
+  entra -->|"short-lived token"| server
+  server -->|"token as password"| appdb
+  ks --> n8n
+  n8n -->|"password"| n8ndb
+```
 
 ## n8n and Slack: Socket Mode
 
