@@ -28,14 +28,17 @@ spec:
       containers:
         - name: web
           # Built locally in OrbStack; update this digest after a deliberate rebuild.
-          image: cmacc-legacy@sha256:c7272e02b05f8784154255011c313e5abfe38df71a22c4263fccf24390cd7b5d
+          image: cmacc-legacy@sha256:0d0b4fb24fadabcfcd57dce4412b2ff7a0ecc094657ab89aa0d4240366ad6d16
           imagePullPolicy: Never
           env:
-            # Deployment-specific repo links (GitHub / Compare); unset = links hidden.
+            # Deployment-specific repo links (GitHub / Compare); empty = links hidden.
             - name: CMACC_REPO_URL
               value: https://github.com/CommonAccord/Cmacc-Org
             - name: CMACC_REPO_BRANCH
               value: master
+            # VS Code link to a local checkout: none in a container, so hidden.
+            - name: CMACC_VSCODE_ROOT
+              value: ""
           ports:
             - name: http
               containerPort: 8080

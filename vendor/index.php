@@ -2,7 +2,7 @@
 
 DEFINE('ROOT' ,dirname(__FILE__) ); // Root directory of site
 
-DEFINE('URLFORREPO', getenv('CMACC_REPO_URL') ?: '');	// The repo home, from deployment config; repo links are hidden when unset
+DEFINE('URLFORREPO', getenv('CMACC_REPO_URL') !== false ? getenv('CMACC_REPO_URL') : 'https://github.com/CommonAccord/Cmacc-Org');	// The repo home; CMACC_REPO_URL overrides it (empty hides repo links)
 
 DEFINE('LANDING_MD', 'S/About/Landing3.md');	// The website home moved because some bot keeps overwriting Landing.md
 

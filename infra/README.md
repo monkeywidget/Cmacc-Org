@@ -3,9 +3,9 @@
 - Legacy PHP/Perl app + document corpus + static assets in one image
 - Nothing cloned or downloaded at startup
 - PHP and Perl only inside containers; never on macOS
-- Legacy application and deploy workflows unchanged, except approved fixes:
-  - corpus links made relative (no hardcoded public host)
-  - developer-specific editor link removed from the tab bar
+- Legacy application and deploy workflows unchanged, except:
+  - repo links (GitHub, Compare) and the VS Code link set by environment; unset = today's links, so the public site is unaffected
+- Corpus (`Doc/`) exactly as upstream
 
 ## Local development environment
 
@@ -102,7 +102,8 @@ Tested host baseline:
 
 ## Runtime
 
-- Repo links (GitHub, Compare) from `CMACC_REPO_URL` / `CMACC_REPO_BRANCH`; hidden when unset
+- Repo links (GitHub, Compare) from `CMACC_REPO_URL` / `CMACC_REPO_BRANCH`; unset = the CommonAccord repo, as on the public site; empty = hidden
+- VS Code link from `CMACC_VSCODE_ROOT` (folder of a local checkout); unset = the maintainer's folder, as on the public site; empty = hidden (set empty in the container)
 - Non-root (UID/GID 33), port 8080
 - Apache front controller is the directory index
 - PHP diagnostics to stderr; short tags on
@@ -223,7 +224,7 @@ kubectl --context orbstack -n cmacc-local port-forward \
 - Compare inventory hashes with the lock
 
 ```bash
-CMACC_IMAGE=cmacc-legacy@sha256:c7272e02b05f8784154255011c313e5abfe38df71a22c4263fccf24390cd7b5d
+CMACC_IMAGE=cmacc-legacy@sha256:0d0b4fb24fadabcfcd57dce4412b2ff7a0ecc094657ab89aa0d4240366ad6d16
 docker --context orbstack run --rm --pull=never --network none \
   "$CMACC_IMAGE" apache2-foreground -t
 docker --context orbstack run --rm --pull=never --network none \
@@ -275,7 +276,7 @@ kubectl --context orbstack -n cmacc-local rollout restart deployment/cmacc-legac
 - Two empty Git links in the corpus, with no submodule config; left empty
 - Save endpoints behave as before; safe locally only because access is via the operator's forward
 - Denial of service: one template can take the container down
-  - the legacy parser has no budgets; on a runaway template (`G/ProseObject-Stack/Legal/Section_0.md`, a prefix that grows forever) Perl grows until the kernel kills it
+  - the legacy parser has no budgets; on a runaway template (an include prefix that grows forever; one exists in the corpus) Perl grows until the kernel kills it
   - alone, only that Perl process dies and the page says "Nothing to Show"
   - under concurrent load, that Perl plus the other workers can exceed the container's 512 MiB limit: the whole container is OOM-killed and restarts (seen once in two full `task parity` runs)
   - any client can trigger it with one GET; safe locally only because access is via the operator's forward

@@ -61,7 +61,7 @@
 - The default Python recursion limit is enough; nothing raises it
 - Why: deep recursion only served runaway templates; legitimate depth comes from long include chains (demo → form → outline → base), which are a search, not nesting
   - measured: the deepest template needed 271 recursive levels before (32 placeholder levels × up to 11 include hops each)
-- Only one template reaches a budget (`G/ProseObject-Stack/Legal/Section_0.md`, a prefix that grows forever); per D3 it shows "Nothing to Show"
+- Only one template in the corpus reaches a budget (its include prefix grows forever); per D3 it shows "Nothing to Show"
 - Changing a budget: rerun the corpus measurement and `task parity`
 
 ## D5 Templates taken from upstream as-is (2026-10-23)

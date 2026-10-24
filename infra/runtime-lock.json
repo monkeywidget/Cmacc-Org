@@ -16,12 +16,12 @@
     }
   },
   "application_image": {
-    "reference": "cmacc-legacy@sha256:c7272e02b05f8784154255011c313e5abfe38df71a22c4263fccf24390cd7b5d",
+    "reference": "cmacc-legacy@sha256:0d0b4fb24fadabcfcd57dce4412b2ff7a0ecc094657ab89aa0d4240366ad6d16",
     "platform": "linux/arm64",
     "source_revision": "cb214303a1a232cb5bc99f5e4b753c5d3e782f67",
     "source_date_epoch": 1788685059,
     "source_inventory": "/usr/local/share/cmacc/source.sha256",
-    "source_inventory_sha256": "10feb9fd1dbccdc01fac8949912443d6fc2f86a1332ff5807a0c9d002a5d4fe4",
+    "source_inventory_sha256": "b80f0072e70ebdedd77c99a3aa80b5db2d3ff3a14cbae16fb59a8d9c8309d7cf",
     "source_file_count": 6839,
     "package_inventory": "/usr/local/share/cmacc/packages.tsv",
     "package_inventory_sha256": "c57110adbb9a7711dd7d2ffdf7c92826bf495728a0f7857e431b1443aca92cdf",

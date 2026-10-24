@@ -17,6 +17,13 @@ if (URLFORDOCSINREPO) {
   echo "<a href=" . URLFORDOCSINREPO . substr($dir, URLFORDOCSINREPOOFFSET) . ">GitHub</a> ";
 }
 
+# Open in VSCode: folder of the local checkout; CMACC_VSCODE_ROOT overrides it (empty hides the link)
+
+$_vscodeRoot = getenv('CMACC_VSCODE_ROOT') !== false ? getenv('CMACC_VSCODE_ROOT') : '/Users/jgh/Documents/GitHub/CommonAccord-Org';
+if ($_vscodeRoot) {
+  echo  "<a href='vscode://file/" . $_vscodeRoot . "/Doc/$dir'>(VSCode)</a> ";
+}
+
 # echo "<a href=" . URLFORREPO . "/search?utf8=✓&q=" . $dir . ">~PageRank </a>  &emsp; ";
 
 echo " &emsp; Doc views: ";
